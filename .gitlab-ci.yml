@@ -1,0 +1,45 @@
+image: node:22-alpine
+
+stages:
+  - verify
+  - test
+  - build
+  - security
+
+variables:
+  PNPM_HOME: "$CI_PROJECT_DIR/.pnpm-store"
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@10.13.1 --activate
+  - pnpm install --frozen-lockfile
+
+lint:
+  stage: verify
+  script:
+    - pnpm lint
+
+typecheck:
+  stage: verify
+  script:
+    - pnpm typecheck
+
+unit_tests:
+  stage: test
+  script:
+    - pnpm test
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+
+build:
+  stage: build
+  script:
+    - pnpm build
+
+dependency_audit:
+  stage: security
+  script:
+    - pnpm audit --audit-level high
+  allow_failure: false

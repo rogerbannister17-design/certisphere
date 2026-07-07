@@ -1,0 +1,4 @@
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: certisphere_local_password

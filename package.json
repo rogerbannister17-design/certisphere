@@ -1,0 +1,48 @@
+{
+  "name": "certisphere",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Commercial SaaS platform for building, managing, and certifying management systems.",
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "prisma:generate": "pnpm --filter @certisphere/database prisma:generate",
+    "prisma:migrate": "pnpm --filter @certisphere/database prisma:migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@nestjs/cli": "^11.0.7",
+    "@nestjs/schematics": "^11.0.5",
+    "@nestjs/testing": "^11.1.5",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^22.15.30",
+    "@types/express": "^5.0.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^9.30.1",
+    "eslint-config-next": "^15.3.4",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-unicorn": "^59.0.1",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.1",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.1",
+    "vitest": "^3.2.4"
+  }
+}

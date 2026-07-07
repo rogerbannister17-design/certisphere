@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organisation {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @db.VarChar(160)
+  slug      String    @unique @db.VarChar(80)
+  createdBy String    @db.Uuid
+  updatedBy String    @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  users User[]
+
+  @@map("organisations")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  email          String    @db.VarChar(320)
+  name           String    @db.VarChar(160)
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+
+  @@unique([organisationId, email])
+  @@index([organisationId])
+  @@map("users")
+}
+
+model AuditEvent {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  actorUserId    String    @db.Uuid
+  action         String    @db.VarChar(120)
+  resource       String    @db.VarChar(160)
+  resourceId     String?   @db.VarChar(160)
+  metadata       Json?
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  occurredAt     DateTime  @default(now())
+
+  @@index([organisationId, occurredAt])
+  @@index([actorUserId, occurredAt])
+  @@map("audit_events")
+}
