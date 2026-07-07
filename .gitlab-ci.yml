@@ -24,10 +24,25 @@ typecheck:
   script:
     - pnpm typecheck
 
+prisma_validate:
+  stage: verify
+  script:
+    - pnpm --filter @certisphere/database prisma:generate
+    - pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma
+
 unit_tests:
   stage: test
   script:
     - pnpm test
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+
+integration_tests:
+  stage: test
+  script:
+    - pnpm test:integration
   artifacts:
     when: always
     paths:

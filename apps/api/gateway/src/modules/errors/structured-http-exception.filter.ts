@@ -7,6 +7,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { type Response } from 'express';
+import {
+  ForbiddenOrganisationAccessError,
+  InactiveUserError,
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
+  IdentityError,
+} from '@certisphere/identity';
 
 interface ErrorRequestContext {
   readonly method?: string;
@@ -22,13 +29,8 @@ export class StructuredHttpExceptionFilter implements ExceptionFilter {
     const httpContext = host.switchToHttp();
     const response = httpContext.getResponse<Response>();
     const request = httpContext.getRequest<ErrorRequestContext>();
-    const statusCode =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    const errorCode =
-      exception instanceof HttpException ? this.resolveErrorCode(exception) : 'INTERNAL_SERVER_ERROR';
+    const statusCode = this.resolveStatusCode(exception);
+    const errorCode = this.resolveErrorCode(exception);
 
     this.logger.error({
       event: 'http_request_failed',
@@ -49,7 +51,37 @@ export class StructuredHttpExceptionFilter implements ExceptionFilter {
     });
   }
 
-  private resolveErrorCode(exception: HttpException): string {
+  private resolveStatusCode(exception: unknown): number {
+    if (exception instanceof HttpException) {
+      return exception.getStatus();
+    }
+
+    if (
+      exception instanceof InvalidCredentialsError ||
+      exception instanceof InvalidRefreshTokenError
+    ) {
+      return HttpStatus.UNAUTHORIZED;
+    }
+
+    if (
+      exception instanceof InactiveUserError ||
+      exception instanceof ForbiddenOrganisationAccessError
+    ) {
+      return HttpStatus.FORBIDDEN;
+    }
+
+    return HttpStatus.INTERNAL_SERVER_ERROR;
+  }
+
+  private resolveErrorCode(exception: unknown): string {
+    if (exception instanceof IdentityError) {
+      return exception.code;
+    }
+
+    if (!(exception instanceof HttpException)) {
+      return 'INTERNAL_SERVER_ERROR';
+    }
+
     const response = exception.getResponse();
 
     if (typeof response === 'object' && 'code' in response) {
@@ -61,6 +93,10 @@ export class StructuredHttpExceptionFilter implements ExceptionFilter {
   }
 
   private resolveMessage(exception: unknown): string {
+    if (exception instanceof IdentityError) {
+      return exception.message;
+    }
+
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
 

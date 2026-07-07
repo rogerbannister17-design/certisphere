@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")/.."
+. ./scripts/lib/environment.sh
+
+section "Toolchain"
+check_node
+check_pnpm
+check_git
+check_prisma
+
+section "Runtime"
+check_docker
+check_docker_compose
+check_postgresql
+
+section "Resources"
+check_disk
+check_memory
+check_cpu
+
+finish_report

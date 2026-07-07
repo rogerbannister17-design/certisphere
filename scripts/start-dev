@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")/.."
+. ./scripts/lib/environment.sh
+
+section "Docker prerequisites"
+check_docker
+check_docker_compose
+check_compose_services
+
+if ! finish_report; then
+  printf '\nCannot start the development stack. Install the missing Docker prerequisites above.\n' >&2
+  exit 1
+fi
+
+section "Starting development stack"
+run_compose up -d postgres redis api-gateway customer-portal
+
+section "Service status"
+run_compose ps

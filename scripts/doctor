@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")/.."
+. ./scripts/lib/environment.sh
+
+section "Environment"
+./scripts/verify-environment || true
+
+section "Environment variables"
+check_required_env
+env_result=0
+finish_report || env_result=$?
+
+section "Docker Compose configuration"
+PASS_COUNT=0
+FAIL_COUNT=0
+WARN_COUNT=0
+check_compose_services
+compose_result=0
+finish_report || compose_result=$?
+
+section "Project validation"
+project_result=0
+load_dotenv
+pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma || project_result=1
+pnpm typecheck || project_result=1
+pnpm lint || project_result=1
+pnpm test || project_result=1
+
+if [ "$env_result" -eq 0 ] && [ "$compose_result" -eq 0 ] && [ "$project_result" -eq 0 ]; then
+  printf '\nDoctor completed successfully.\n'
+  exit 0
+fi
+
+printf '\nDoctor found issues. Review the FAIL messages above.\n' >&2
+exit 1

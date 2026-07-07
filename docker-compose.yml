@@ -23,6 +23,38 @@ services:
     volumes:
       - redis_data:/data
 
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api/gateway/Dockerfile
+    environment:
+      NODE_ENV: development
+      API_PORT: 3001
+      DATABASE_URL: postgresql://certisphere:certisphere_local_password@postgres:5432/certisphere?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_TOKEN_SECRET: certisphere-local-development-access-secret
+      IDENTITY_BOOTSTRAP_TOKEN: certisphere-local-development-setup-token
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "3001:3001"
+
+  customer-portal:
+    build:
+      context: .
+      dockerfile: apps/web/customer-portal/Dockerfile
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
+    depends_on:
+      api-gateway:
+        condition: service_started
+    ports:
+      - "3000:3000"
+
 volumes:
   postgres_data:
   redis_data:

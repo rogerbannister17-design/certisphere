@@ -16,6 +16,26 @@ Milestone 1.1 establishes the production monorepo foundation for the platform:
 
 This repository does not contain prototype, demo, or mock implementations. Business features must be delivered as production slices with tests, documentation, API specifications, acceptance criteria, logging, security, and audit trails.
 
+## Milestone 1.2E Validation
+
+Milestone 1.2E validates the Identity and Organisation implementation for production readiness.
+
+Validated locally:
+
+- Deterministic dependency installation with `pnpm install --frozen-lockfile`.
+- Prisma Client generation and Prisma schema validation.
+- TypeScript typecheck across every workspace.
+- ESLint across every workspace.
+- Production build across every workspace.
+- Unit tests across every workspace.
+- API integration tests for signed JWT authentication and RBAC-protected health access.
+- High-severity dependency audit gate.
+
+Environment-blocked checks:
+
+- Docker image build and full stack startup require Docker.
+- PostgreSQL migration apply/rollback and seed verification require Docker or local PostgreSQL tooling.
+
 ## Workspace
 
 ```text
@@ -41,10 +61,13 @@ tools/       Generators, codegen, schema, QA, and migration tooling
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm prisma:generate
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:integration
 pnpm build
+pnpm audit --audit-level high
 ```
 
 ## Governance

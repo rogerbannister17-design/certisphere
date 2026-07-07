@@ -9,10 +9,10 @@ export class AuthorisationGuard implements CanActivate {
   constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.getAllAndOverride<readonly string[]>(
+    const requiredPermissions = this.reflector.getAllAndOverride<readonly string[] | undefined>(
       REQUIRED_PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
-    );
+    ) ?? [];
 
     if (requiredPermissions.length === 0) {
       throw new ForbiddenException({

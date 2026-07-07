@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+set -eu
+
+cd "$(dirname "$0")/.."
+. ./scripts/lib/environment.sh
+
+section "Environment verification"
+./scripts/verify-environment
+
+section "Environment variables"
+check_required_env
+finish_report
+
+section "Dependency installation"
+pnpm install --frozen-lockfile
+
+section "Prisma"
+pnpm --filter @certisphere/database prisma:generate
+pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma
+
+section "Bootstrap complete"
+printf 'Development environment bootstrap completed successfully.\n'

@@ -7,18 +7,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum MfaFactorType {
+  TOTP
+  WEBAUTHN
+}
+
+enum MfaFactorStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
 model Organisation {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String    @db.VarChar(160)
-  slug      String    @unique @db.VarChar(80)
-  createdBy String    @db.Uuid
-  updatedBy String    @db.Uuid
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  version   Int       @default(1)
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @unique @db.Uuid
+  name           String    @db.VarChar(160)
+  slug           String    @unique @db.VarChar(80)
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
 
   users User[]
+  roles Role[]
+  permissions Permission[]
+  invitations Invitation[]
+  memberships OrganisationMembership[]
+  sessions Session[]
+  refreshTokens RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  mfaFactors MfaFactor[]
 
   @@map("organisations")
 }
@@ -28,6 +68,9 @@ model User {
   organisationId String    @db.Uuid
   email          String    @db.VarChar(320)
   name           String    @db.VarChar(160)
+  passwordHash   String    @db.VarChar(512)
+  status         UserStatus @default(ACTIVE)
+  lastLoginAt    DateTime?
   createdBy      String    @db.Uuid
   updatedBy      String    @db.Uuid
   createdAt      DateTime  @default(now())
@@ -36,10 +79,235 @@ model User {
   version        Int       @default(1)
 
   organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  memberships OrganisationMembership[]
+  roles UserRole[]
+  sessions Session[]
+  refreshTokens RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  mfaFactors MfaFactor[]
 
   @@unique([organisationId, email])
   @@index([organisationId])
   @@map("users")
+}
+
+model OrganisationMembership {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  userId         String    @db.Uuid
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([organisationId, userId])
+  @@index([userId])
+  @@map("organisation_memberships")
+}
+
+model Role {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  key            String    @db.VarChar(80)
+  name           String    @db.VarChar(120)
+  description    String?   @db.VarChar(500)
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  users UserRole[]
+  permissions RolePermission[]
+
+  @@unique([organisationId, key])
+  @@index([organisationId])
+  @@map("roles")
+}
+
+model Permission {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  key            String    @db.VarChar(120)
+  description    String?   @db.VarChar(500)
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  roles RolePermission[]
+
+  @@unique([organisationId, key])
+  @@index([organisationId])
+  @@map("permissions")
+}
+
+model UserRole {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  userId         String    @db.Uuid
+  roleId         String    @db.Uuid
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([organisationId, userId, roleId])
+  @@index([organisationId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  roleId         String    @db.Uuid
+  permissionId   String    @db.Uuid
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Restrict)
+
+  @@unique([organisationId, roleId, permissionId])
+  @@index([organisationId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model Session {
+  id             String        @id @default(uuid()) @db.Uuid
+  organisationId String        @db.Uuid
+  userId         String        @db.Uuid
+  status         SessionStatus @default(ACTIVE)
+  ipAddress      String?       @db.VarChar(64)
+  userAgent      String?       @db.VarChar(500)
+  expiresAt      DateTime
+  createdBy      String        @db.Uuid
+  updatedBy      String        @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  version        Int           @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  refreshTokens RefreshToken[]
+
+  @@index([organisationId, userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  userId         String    @db.Uuid
+  sessionId      String    @db.Uuid
+  tokenHash      String    @unique @db.VarChar(128)
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+
+  @@index([organisationId, userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Invitation {
+  id             String           @id @default(uuid()) @db.Uuid
+  organisationId String           @db.Uuid
+  email          String           @db.VarChar(320)
+  roleKey        String           @db.VarChar(80)
+  tokenHash      String           @unique @db.VarChar(128)
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdBy      String           @db.Uuid
+  updatedBy      String           @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  version        Int              @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+
+  @@index([organisationId, email])
+  @@index([expiresAt])
+  @@map("invitations")
+}
+
+model PasswordResetToken {
+  id             String    @id @default(uuid()) @db.Uuid
+  organisationId String    @db.Uuid
+  userId         String    @db.Uuid
+  tokenHash      String    @unique @db.VarChar(128)
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  createdBy      String    @db.Uuid
+  updatedBy      String    @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  version        Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([organisationId, userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model MfaFactor {
+  id             String          @id @default(uuid()) @db.Uuid
+  organisationId String          @db.Uuid
+  userId         String          @db.Uuid
+  type           MfaFactorType
+  status         MfaFactorStatus @default(PENDING)
+  secretCipher   String          @db.VarChar(1000)
+  createdBy      String          @db.Uuid
+  updatedBy      String          @db.Uuid
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  version        Int             @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([organisationId, userId])
+  @@map("mfa_factors")
 }
 
 model AuditEvent {
@@ -56,6 +324,7 @@ model AuditEvent {
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
   occurredAt     DateTime  @default(now())
+  version        Int       @default(1)
 
   @@index([organisationId, occurredAt])
   @@index([actorUserId, occurredAt])
