@@ -1,0 +1,618 @@
+QMS Studio™
+Tagline
+Build, manage and certify your management systems in one platform.
+
+qms-studio/
+│
+├── README.md
+├── LICENSE
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
+├── .gitignore
+├── .editorconfig
+├── .gitattributes
+├── .nvmrc
+├── package.json
+├── pnpm-workspace.yaml
+├── turbo.json
+├── tsconfig.base.json
+├── docker-compose.yml
+├── docker-compose.override.yml
+├── Makefile
+│
+├── .github/
+├── .gitlab/
+├── docs/
+├── infrastructure/
+├── scripts/
+├── tools/
+├── packages/
+├── apps/
+├── services/
+├── tests/
+└── templates/
+
+Applications
+apps/
+
+    web/
+        customer-portal/
+
+    admin/
+        platform-admin/
+
+    auditor/
+        auditor-portal/
+
+    consultant/
+        consultant-portal/
+
+    api/
+        gateway/
+
+    mobile/
+        ios/
+        android/
+
+    desktop/
+        electron/
+
+Shared Packages
+packages/
+
+    ui/
+
+    design-system/
+
+    auth/
+
+    database/
+
+    workflow/
+
+    document-engine/
+
+    numbering/
+
+    approval-engine/
+
+    evidence-engine/
+
+    audit-engine/
+
+    notification-engine/
+
+    ai-engine/
+
+    search/
+
+    storage/
+
+    reports/
+
+    diagrams/
+
+    permissions/
+
+    licensing/
+
+    analytics/
+
+    integrations/
+
+    common/
+
+    shared/
+
+Core Business Services
+services/
+
+    identity-service/
+
+    organisation-service/
+
+    user-service/
+
+    document-service/
+
+    workflow-service/
+
+    approval-service/
+
+    audit-service/
+
+    evidence-service/
+
+    risk-service/
+
+    supplier-service/
+
+    customer-service/
+
+    capa-service/
+
+    training-service/
+
+    process-service/
+
+    kpi-service/
+
+    management-review-service/
+
+    notification-service/
+
+    ai-service/
+
+    search-service/
+
+    reporting-service/
+
+    billing-service/
+
+    licence-service/
+
+    integration-service/
+
+Infrastructure
+infrastructure/
+
+    docker/
+
+    kubernetes/
+
+    terraform/
+
+    azure/
+
+    nginx/
+
+    monitoring/
+
+    logging/
+
+    postgres/
+
+    redis/
+
+    rabbitmq/
+
+    elastic/
+
+    meilisearch/
+
+    backups/
+
+    certificates/
+
+Documentation
+docs/
+
+    architecture/
+
+    api/
+
+    database/
+
+    deployment/
+
+    security/
+
+    ui/
+
+    standards/
+
+    user-guides/
+
+    administrator-guides/
+
+    developer-guides/
+
+    release-notes/
+
+    roadmap/
+
+    adr/
+ADR = Architecture Decision Records.
+
+Templates
+templates/
+
+    master/
+
+    procedures/
+
+    policies/
+
+    manuals/
+
+    work-instructions/
+
+    forms/
+
+    registers/
+
+    checklists/
+
+    reports/
+
+    plans/
+
+    evidence-matrices/
+
+    turtle-diagrams/
+
+    process-flows/
+
+    dashboards/
+
+    certificates/
+
+Automated Scripts
+scripts/
+
+    bootstrap/
+
+    install/
+
+    build/
+
+    test/
+
+    lint/
+
+    release/
+
+    migrate/
+
+    seed/
+
+    deploy/
+
+    backup/
+
+    restore/
+
+Development Tools
+tools/
+
+    generators/
+
+    codegen/
+
+    schema/
+
+    templates/
+
+    cli/
+
+    migration-tools/
+
+    import-export/
+
+    qa/
+
+Test Structure
+tests/
+
+    unit/
+
+    integration/
+
+    e2e/
+
+    performance/
+
+    load/
+
+    security/
+
+    accessibility/
+
+    regression/
+
+GitLab Configuration
+.gitlab/
+
+    issue_templates/
+
+    merge_request_templates/
+
+    pipelines/
+
+    security/
+
+    labels/
+
+GitHub Compatibility
+.github/
+
+    workflows/
+
+    ISSUE_TEMPLATE/
+
+    PULL_REQUEST_TEMPLATE/
+
+    CODEOWNERS/
+
+    dependabot.yml/
+
+Database Package
+packages/database/
+
+    prisma/
+
+        schema/
+
+        migrations/
+
+        seeds/
+
+        fixtures/
+
+    src/
+
+        repositories/
+
+        models/
+
+        services/
+
+        utilities/
+
+Authentication Package
+packages/auth/
+
+    src/
+
+        controllers/
+
+        services/
+
+        guards/
+
+        middleware/
+
+        providers/
+
+        jwt/
+
+        oauth/
+
+        mfa/
+
+        passkeys/
+
+        sessions/
+
+Document Engine
+packages/document-engine/
+
+    src/
+
+        editor/
+
+        numbering/
+
+        templates/
+
+        rendering/
+
+        versioning/
+
+        approvals/
+
+        revisions/
+
+        metadata/
+
+        relationships/
+
+        exports/
+
+        pdf/
+
+        docx/
+
+        markdown/
+
+        html/
+
+Workflow Engine
+packages/workflow/
+
+    src/
+
+        definitions/
+
+        approvals/
+
+        states/
+
+        transitions/
+
+        triggers/
+
+        reminders/
+
+        escalations/
+
+        audit/
+
+AI Engine
+packages/ai-engine/
+
+    src/
+
+        document-generation/
+
+        clause-mapping/
+
+        gap-analysis/
+
+        duplicate-detection/
+
+        recommendations/
+
+        risk-analysis/
+
+        evidence-analysis/
+
+        prompts/
+
+        embeddings/
+
+        vector-search/
+
+        providers/
+
+ISO Knowledge Base
+packages/common/standards/
+
+    iso9001/
+
+    iso14001/
+
+    iso45001/
+
+    iso27001/
+
+    iso22301/
+
+    iso31000/
+
+    iso13485/
+
+    iso17025/
+
+    custom/
+
+Integrations
+packages/integrations/
+
+    microsoft365/
+
+    sharepoint/
+
+    onedrive/
+
+    teams/
+
+    google/
+
+    google-drive/
+
+    gmail/
+
+    outlook/
+
+    slack/
+
+    jira/
+
+    azure-ad/
+
+    stripe/
+
+    sendgrid/
+
+    twilio/
+
+Design System
+packages/design-system/
+
+    tokens/
+
+    themes/
+
+    typography/
+
+    icons/
+
+    colours/
+
+    spacing/
+
+    components/
+
+    charts/
+
+    forms/
+
+    layouts/
+
+User Portal Structure
+apps/web/customer-portal/
+
+    dashboard/
+
+    documents/
+
+    procedures/
+
+    registers/
+
+    forms/
+
+    checklists/
+
+    audits/
+
+    evidence/
+
+    risks/
+
+    suppliers/
+
+    customers/
+
+    capa/
+
+    training/
+
+    reports/
+
+    settings/
+
+    administration/
+
+Auditor Portal
+apps/auditor/
+
+    dashboard/
+
+    organisations/
+
+    evidence/
+
+    findings/
+
+    observations/
+
+    reports/
+
+    requests/
+
+    schedules/
+
+    certificates/
+
+Mobile App
+apps/mobile/
+
+    shared/
+
+    offline/
+
+    sync/
+
+    camera/
+
+    evidence/
+
+    signatures/
+
+    notifications/
+
+
