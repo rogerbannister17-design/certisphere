@@ -38,6 +38,81 @@ enum MfaFactorStatus {
   DISABLED
 }
 
+enum ControlledInformationType {
+  DOCUMENT
+  POLICY
+  PROCEDURE
+  FORM
+  REGISTER
+  CHECKLIST
+  RECORD
+  EVIDENCE
+  TEMPLATE
+}
+
+enum KcipLifecycleState {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  SUPERSEDED
+  ARCHIVED
+  WITHDRAWN
+  OBSOLETE
+}
+
+enum ClassificationLevel {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+}
+
+enum RelationshipType {
+  CLAUSE_SUPPORTS_DOCUMENT
+  DOCUMENT_SUPPORTS_PROCESS
+  DOCUMENT_GENERATES_RECORD
+  DOCUMENT_REQUIRES_TRAINING
+  DOCUMENT_CONTROLS_RISK
+  DOCUMENT_SUPPORTS_AUDIT
+  DOCUMENT_DRIVES_CAPA
+  DOCUMENT_CONTROLS_SUPPLIER
+  EVIDENCE_SUPPORTS_DOCUMENT
+  REVISION_SUPERSEDES_REVISION
+}
+
+enum EvidenceRelationshipType {
+  SUPPORTS
+  GENERATED_BY
+  VERIFIES
+  SUPERSEDES
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+}
+
+enum ClauseCoverageType {
+  FULL
+  PARTIAL
+  SUPPORTING
+}
+
+enum ProcessLinkRelationship {
+  OWNS
+  SUPPORTS
+  GENERATES_RECORD
+  REQUIRES_TRAINING
+}
+
+enum WorkflowReferenceStatus {
+  NOT_STARTED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model Organisation {
   id             String    @id @default(uuid()) @db.Uuid
   organisationId String    @unique @db.Uuid
@@ -59,6 +134,12 @@ model Organisation {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   mfaFactors MfaFactor[]
+  controlledInformation ControlledInformation[]
+  documentRecords KcipDocument[]
+  documentRevisions DocumentRevision[]
+  documentApprovals DocumentApproval[]
+  documentRelationships DocumentRelationship[]
+  evidenceLinks DocumentEvidenceLink[]
 
   @@map("organisations")
 }
@@ -329,4 +410,310 @@ model AuditEvent {
   @@index([organisationId, occurredAt])
   @@index([actorUserId, occurredAt])
   @@map("audit_events")
+}
+
+model ControlledInformation {
+  id                    String                    @id @default(uuid()) @db.Uuid
+  organisationId        String                    @db.Uuid
+  type                  ControlledInformationType
+  title                 String                    @db.VarChar(240)
+  documentNumber        String                    @db.VarChar(64)
+  classification        ClassificationLevel
+  categoryName          String                    @db.VarChar(160)
+  categoryActive        Boolean                   @default(true)
+  ownerUserId           String                    @db.Uuid
+  ownerRole             String                    @db.VarChar(120)
+  accessPolicy          Json
+  retentionDays         Int
+  legalHold             Boolean                   @default(false)
+  metadata              Json
+  lifecycle             KcipLifecycleState        @default(DRAFT)
+  archivedAt            DateTime?
+  archivedBy            String?                   @db.Uuid
+  archiveReason         String?                   @db.VarChar(1000)
+  createdAt             DateTime                  @default(now())
+  createdBy             String                    @db.Uuid
+  modifiedAt            DateTime                  @updatedAt
+  modifiedBy            String                    @db.Uuid
+  tenantId              String                    @db.Uuid
+  deletedAt             DateTime?
+  version               Int                       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  document KcipDocument?
+  revisions DocumentRevision[]
+  relationships DocumentRelationship[]
+  evidenceLinks DocumentEvidenceLink[]
+  comments DocumentComment[]
+  reviews DocumentReview[]
+  attachments DocumentAttachment[]
+  clauseMappings DocumentClauseMapping[]
+  processLinks DocumentProcessLink[]
+  workflowReferences DocumentWorkflowReference[]
+
+  @@unique([organisationId, documentNumber])
+  @@index([tenantId, lifecycle])
+  @@index([tenantId, classification])
+  @@index([tenantId, deletedAt])
+  @@map("controlled_information")
+}
+
+model KcipDocument {
+  id                      String    @id @default(uuid()) @db.Uuid
+  organisationId          String    @db.Uuid
+  controlledInformationId String    @unique @db.Uuid
+  createdAt               DateTime  @default(now())
+  createdBy               String    @db.Uuid
+  modifiedAt              DateTime  @updatedAt
+  modifiedBy              String    @db.Uuid
+  tenantId                String    @db.Uuid
+  deletedAt               DateTime?
+  version                 Int       @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+  revisions DocumentRevision[]
+  approvals DocumentApproval[]
+
+  @@index([tenantId, deletedAt])
+  @@map("kcip_documents")
+}
+
+model DocumentRevision {
+  id                      String             @id @default(uuid()) @db.Uuid
+  organisationId          String             @db.Uuid
+  documentId              String             @db.Uuid
+  controlledInformationId String             @db.Uuid
+  revisionNumber          String             @db.VarChar(32)
+  authorId                String             @db.Uuid
+  contentHash             String             @db.VarChar(128)
+  changeSummary           String             @db.VarChar(1000)
+  lifecycle               KcipLifecycleState @default(DRAFT)
+  approvedAt              DateTime?
+  publishedAt             DateTime?
+  createdAt               DateTime           @default(now())
+  createdBy               String             @db.Uuid
+  modifiedAt              DateTime           @updatedAt
+  modifiedBy              String             @db.Uuid
+  tenantId                String             @db.Uuid
+  revisionId              String             @db.Uuid
+  deletedAt               DateTime?
+  version                 Int                @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  document KcipDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+  approvals DocumentApproval[]
+
+  @@unique([documentId, revisionNumber])
+  @@index([tenantId, lifecycle])
+  @@index([tenantId, deletedAt])
+  @@map("document_revisions")
+}
+
+model DocumentApproval {
+  id             String            @id @default(uuid()) @db.Uuid
+  organisationId String            @db.Uuid
+  documentId     String            @db.Uuid
+  revisionId     String            @db.Uuid
+  requestedBy    String            @db.Uuid
+  approverId     String            @db.Uuid
+  decision       ApprovalDecision?
+  signature      Json?
+  completedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  createdBy      String            @db.Uuid
+  modifiedAt     DateTime          @updatedAt
+  modifiedBy     String            @db.Uuid
+  tenantId       String            @db.Uuid
+  deletedAt      DateTime?
+  version        Int               @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  document KcipDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, revisionId])
+  @@index([tenantId, decision])
+  @@index([tenantId, deletedAt])
+  @@map("document_approvals")
+}
+
+model DocumentRelationship {
+  id                      String           @id @default(uuid()) @db.Uuid
+  organisationId          String           @db.Uuid
+  controlledInformationId String           @db.Uuid
+  targetId                String           @db.VarChar(256)
+  type                    RelationshipType
+  rationale               String           @db.VarChar(1000)
+  createdAt               DateTime         @default(now())
+  createdBy               String           @db.Uuid
+  modifiedAt              DateTime         @updatedAt
+  modifiedBy              String           @db.Uuid
+  tenantId                String           @db.Uuid
+  deletedAt               DateTime?
+  version                 Int              @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, type])
+  @@index([tenantId, targetId])
+  @@index([tenantId, deletedAt])
+  @@map("document_relationships")
+}
+
+model DocumentEvidenceLink {
+  id                      String                   @id @default(uuid()) @db.Uuid
+  organisationId          String                   @db.Uuid
+  controlledInformationId String                   @db.Uuid
+  evidenceReference       String                   @db.VarChar(256)
+  relationshipType        EvidenceRelationshipType
+  verified                Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  createdBy               String                   @db.Uuid
+  modifiedAt              DateTime                 @updatedAt
+  modifiedBy              String                   @db.Uuid
+  tenantId                String                   @db.Uuid
+  deletedAt               DateTime?
+  version                 Int                      @default(1)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, evidenceReference])
+  @@index([tenantId, verified])
+  @@index([tenantId, deletedAt])
+  @@map("document_evidence_links")
+}
+
+model DocumentComment {
+  id                      String    @id @default(uuid()) @db.Uuid
+  organisationId          String    @db.Uuid
+  controlledInformationId String    @db.Uuid
+  authorId                String    @db.Uuid
+  body                    String    @db.VarChar(4000)
+  resolved                Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  createdBy               String    @db.Uuid
+  modifiedAt              DateTime  @updatedAt
+  modifiedBy              String    @db.Uuid
+  tenantId                String    @db.Uuid
+  deletedAt               DateTime?
+  version                 Int       @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, controlledInformationId])
+  @@index([tenantId, resolved])
+  @@map("document_comments")
+}
+
+model DocumentReview {
+  id                              String    @id @default(uuid()) @db.Uuid
+  organisationId                  String    @db.Uuid
+  controlledInformationId         String    @db.Uuid
+  reviewerId                      String    @db.Uuid
+  completed                       Boolean   @default(false)
+  unresolvedMandatoryCommentCount Int       @default(0)
+  createdAt                       DateTime  @default(now())
+  createdBy                       String    @db.Uuid
+  modifiedAt                      DateTime  @updatedAt
+  modifiedBy                      String    @db.Uuid
+  tenantId                        String    @db.Uuid
+  deletedAt                       DateTime?
+  version                         Int       @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, controlledInformationId])
+  @@index([tenantId, completed])
+  @@map("document_reviews")
+}
+
+model DocumentAttachment {
+  id                      String    @id @default(uuid()) @db.Uuid
+  organisationId          String    @db.Uuid
+  controlledInformationId String    @db.Uuid
+  filename                String    @db.VarChar(260)
+  checksum                String    @db.VarChar(128)
+  accepted                Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  createdBy               String    @db.Uuid
+  modifiedAt              DateTime  @updatedAt
+  modifiedBy              String    @db.Uuid
+  tenantId                String    @db.Uuid
+  deletedAt               DateTime?
+  version                 Int       @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, controlledInformationId])
+  @@index([tenantId, checksum])
+  @@map("document_attachments")
+}
+
+model DocumentClauseMapping {
+  id                      String             @id @default(uuid()) @db.Uuid
+  organisationId          String             @db.Uuid
+  controlledInformationId String             @db.Uuid
+  standard                String             @db.VarChar(32)
+  standardVersion         String             @db.VarChar(32)
+  clause                  String             @db.VarChar(64)
+  coverageType            ClauseCoverageType
+  createdAt               DateTime           @default(now())
+  createdBy               String             @db.Uuid
+  modifiedAt              DateTime           @updatedAt
+  modifiedBy              String             @db.Uuid
+  tenantId                String             @db.Uuid
+  deletedAt               DateTime?
+  version                 Int                @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@unique([controlledInformationId, standard, standardVersion, clause])
+  @@index([tenantId, standard, clause])
+  @@map("document_clause_mappings")
+}
+
+model DocumentProcessLink {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  organisationId          String                  @db.Uuid
+  controlledInformationId String                  @db.Uuid
+  processReference        String                  @db.VarChar(128)
+  relationship            ProcessLinkRelationship
+  createdAt               DateTime                @default(now())
+  createdBy               String                  @db.Uuid
+  modifiedAt              DateTime                @updatedAt
+  modifiedBy              String                  @db.Uuid
+  tenantId                String                  @db.Uuid
+  deletedAt               DateTime?
+  version                 Int                     @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, processReference])
+  @@index([tenantId, relationship])
+  @@map("document_process_links")
+}
+
+model DocumentWorkflowReference {
+  id                      String                  @id @default(uuid()) @db.Uuid
+  organisationId          String                  @db.Uuid
+  controlledInformationId String                  @db.Uuid
+  externalReference       String                  @db.VarChar(160)
+  status                  WorkflowReferenceStatus
+  createdAt               DateTime                @default(now())
+  createdBy               String                  @db.Uuid
+  modifiedAt              DateTime                @updatedAt
+  modifiedBy              String                  @db.Uuid
+  tenantId                String                  @db.Uuid
+  deletedAt               DateTime?
+  version                 Int                     @default(1)
+
+  controlledInformation ControlledInformation @relation(fields: [controlledInformationId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, externalReference])
+  @@index([tenantId, status])
+  @@map("document_workflow_references")
 }

@@ -128,6 +128,10 @@ export class EvidenceLink {
     return new EvidenceLink(properties);
   }
 
+  static rehydrate(properties: EvidenceLinkProperties): EvidenceLink {
+    return new EvidenceLink(properties);
+  }
+
   get id(): EvidenceLinkId {
     return this.properties.id;
   }
@@ -138,6 +142,18 @@ export class EvidenceLink {
 
   get controlledInformationId(): ControlledInformationId {
     return this.properties.controlledInformationId;
+  }
+
+  get evidenceReference(): EvidenceReference {
+    return this.properties.evidenceReference;
+  }
+
+  get relationshipType(): EvidenceLinkProperties['relationshipType'] {
+    return this.properties.relationshipType;
+  }
+
+  get verified(): boolean {
+    return this.properties.verified;
   }
 }
 
@@ -161,6 +177,10 @@ export class Relationship {
     return new Relationship(properties);
   }
 
+  static rehydrate(properties: RelationshipProperties): Relationship {
+    return new Relationship(properties);
+  }
+
   get id(): RelationshipId {
     return this.properties.id;
   }
@@ -175,6 +195,14 @@ export class Relationship {
 
   get targetId(): string {
     return this.properties.targetId;
+  }
+
+  get type(): RelationshipType {
+    return this.properties.type;
+  }
+
+  get rationale(): string {
+    return this.properties.rationale;
   }
 }
 
@@ -207,6 +235,10 @@ export class Revision {
     return new Revision({ ...properties, lifecycle: 'DRAFT', approvedAt: null, publishedAt: null });
   }
 
+  static rehydrate(properties: RevisionProperties): Revision {
+    return new Revision(properties);
+  }
+
   get id(): RevisionId {
     return this.properties.id;
   }
@@ -229,6 +261,18 @@ export class Revision {
 
   get contentHash(): string {
     return this.properties.contentHash;
+  }
+
+  get changeSummary(): string {
+    return this.properties.changeSummary;
+  }
+
+  get approvedAt(): Date | null {
+    return this.properties.approvedAt;
+  }
+
+  get publishedAt(): Date | null {
+    return this.properties.publishedAt;
   }
 
   submitForReview(): Revision {
@@ -293,6 +337,10 @@ export class Approval {
     return new Approval({ ...properties, decision: null, signature: null, completedAt: null });
   }
 
+  static rehydrate(properties: ApprovalProperties): Approval {
+    return new Approval(properties);
+  }
+
   get id(): ApprovalId {
     return this.properties.id;
   }
@@ -305,8 +353,24 @@ export class Approval {
     return this.properties.revisionId;
   }
 
+  get organisationId(): OrganisationId {
+    return this.properties.organisationId;
+  }
+
+  get approverId(): UserId {
+    return this.properties.approverId;
+  }
+
   get decision(): ApprovalDecision | null {
     return this.properties.decision;
+  }
+
+  get signature(): ElectronicSignature | null {
+    return this.properties.signature;
+  }
+
+  get completedAt(): Date | null {
+    return this.properties.completedAt;
   }
 
   complete(decision: ApprovalDecision, signature: ElectronicSignature): Approval {
@@ -352,6 +416,17 @@ export class ControlledInformation {
     });
   }
 
+  static rehydrate(properties: ControlledInformationProperties): ControlledInformation {
+    validateControlledInformation({
+      ...properties,
+      createdBy: properties.createdBy,
+      updatedBy: properties.updatedBy,
+      createdAt: properties.createdAt,
+      updatedAt: properties.updatedAt,
+    });
+    return new ControlledInformation(properties);
+  }
+
   get id(): ControlledInformationId {
     return this.properties.id;
   }
@@ -370,6 +445,58 @@ export class ControlledInformation {
 
   get classification(): Classification {
     return this.properties.classification;
+  }
+
+  get type(): ControlledInformationType {
+    return this.properties.type;
+  }
+
+  get title(): string {
+    return this.properties.title;
+  }
+
+  get category(): Category {
+    return this.properties.category;
+  }
+
+  get owner(): Owner {
+    return this.properties.owner;
+  }
+
+  get accessPolicy(): AccessPolicy {
+    return this.properties.accessPolicy;
+  }
+
+  get retentionRule(): RetentionRule {
+    return this.properties.retentionRule;
+  }
+
+  get metadata(): Metadata {
+    return this.properties.metadata;
+  }
+
+  get archiveRecord(): Archive | null {
+    return this.properties.archive;
+  }
+
+  get createdBy(): UserId {
+    return this.properties.createdBy;
+  }
+
+  get updatedBy(): UserId {
+    return this.properties.updatedBy;
+  }
+
+  get createdAt(): Date {
+    return this.properties.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.properties.updatedAt;
+  }
+
+  get deletedAt(): Date | null {
+    return this.properties.deletedAt;
   }
 
   transitionTo(
@@ -445,6 +572,10 @@ export class Document {
 
   private constructor(private readonly properties: DocumentProperties) {}
 
+  static rehydrate(properties: DocumentProperties): Document {
+    return new Document(properties);
+  }
+
   static create(
     properties: Omit<
       DocumentProperties,
@@ -502,6 +633,42 @@ export class Document {
 
   get approvals(): readonly Approval[] {
     return this.properties.approvals;
+  }
+
+  get controlledInformation(): ControlledInformation {
+    return this.properties.controlledInformation;
+  }
+
+  get relationships(): readonly Relationship[] {
+    return this.properties.relationships;
+  }
+
+  get evidenceLinks(): readonly EvidenceLink[] {
+    return this.properties.evidenceLinks;
+  }
+
+  get comments(): readonly Comment[] {
+    return this.properties.comments;
+  }
+
+  get reviews(): readonly Review[] {
+    return this.properties.reviews;
+  }
+
+  get attachments(): readonly Attachment[] {
+    return this.properties.attachments;
+  }
+
+  get clauseMappings(): readonly ClauseMapping[] {
+    return this.properties.clauseMappings;
+  }
+
+  get processLinks(): readonly ProcessLink[] {
+    return this.properties.processLinks;
+  }
+
+  get workflowReferences(): readonly WorkflowReference[] {
+    return this.properties.workflowReferences;
   }
 
   get events(): readonly DocumentDomainEvent[] {

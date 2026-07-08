@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "prisma:rollback:kcip": "psql \"$DATABASE_URL\" -f prisma/migrations/20260708130000_release_0_2_sprint_2_2_kcip_persistence/rollback.sql",
+    "prisma:seed": "psql \"$DATABASE_URL\" -f prisma/seed.sql",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

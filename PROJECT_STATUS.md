@@ -2,7 +2,7 @@
 
 ## Current Version
 
-0.3.8
+0.3.9
 
 ## Completed Milestones
 
@@ -16,12 +16,13 @@
 - Release 0.1.3 Specification Refinement: Complete. SPEC-0001-KCIP is refined to resolve engineering design review findings, and second review readiness is documented at 96%.
 - Release 0.2 Planning: Complete. `SPEC-0001-KCIP.md` defines the Knowledge & Controlled Information Platform engineering specification. Sprint 2.1 domain implementation is complete.
 - Release 0.2 Sprint 2.1 Domain Model: Complete. KCIP domain aggregates, value objects, lifecycle state machine, domain events, repository interfaces, and domain unit tests are implemented under `services/documents`.
+- Release 0.2 Sprint 2.2 Persistence Foundation: Complete. Release Policy, KCIP Prisma schema, migration SQL, rollback SQL, seed SQL, repository adapters, entity mappers, and persistence tests are implemented.
 
 ## Pending Milestones
 
 - Notification delivery for invitation and password reset emails.
 - MFA verification flows beyond persistence and domain boundaries.
-- Release 0.2 Sprint 2.2 Database: Current. Prisma models, migrations, indexes, constraints, seed data, and rollback validation are pending explicit Sprint 2.2 authorisation.
+- Release 0.2 Sprint 2.3: Pending explicit authorisation. No Sprint 2.3 implementation has started.
 - Milestone 1.2F Release Verification: Waiting for Runtime Validation. Docker Compose stack startup, PostgreSQL migration apply/rollback, seed verification, end-to-end runtime authentication, frontend runtime workflows, and GitLab runner pipeline confirmation must run on a Docker-enabled workstation or GitLab runner.
 - PostgreSQL-backed migration execution, seed execution, and rollback verification in an environment with Docker or PostgreSQL tooling installed.
 - Docker image build and full-stack runtime verification in an environment with Docker installed.
@@ -33,6 +34,9 @@
 - Migration file added at `packages/database/prisma/migrations/20260707120000_milestone_1_identity_organisation/migration.sql`.
 - Prisma Client generation passes.
 - Prisma schema validation passes.
+- KCIP persistence migration added at `packages/database/prisma/migrations/20260708130000_release_0_2_sprint_2_2_kcip_persistence/migration.sql`.
+- KCIP persistence rollback script added at `packages/database/prisma/migrations/20260708130000_release_0_2_sprint_2_2_kcip_persistence/rollback.sql`.
+- KCIP seed data added at `packages/database/prisma/seed.sql`.
 - Migration apply/rollback and seed execution are blocked in this local environment because `docker`, `psql`, `postgres`, and `pg_ctl` are unavailable.
 
 ## Test Coverage
@@ -47,6 +51,7 @@
 - ESLint passes.
 - Production build passes for every workspace.
 - Release 0.2 Sprint 2.1 KCIP domain tests pass for lifecycle transitions, revision rules, document numbering, approval rules, relationship validation, evidence links, value objects, business invariants, and domain events.
+- Release 0.2 Sprint 2.2 KCIP persistence tests pass for migration structure, rollback structure, seed validation, repository transactions, tenant metadata, entity mapping, and adapter persistence behaviour.
 - High-severity dependency audit passes after pinning patched `multer` via workspace override.
 
 ## Known Issues
@@ -60,7 +65,7 @@
 
 ## Next Milestone
 
-Run Docker/PostgreSQL-backed verification on a workstation or CI runner with Docker installed, then connect notification templates and MFA challenge verification.
+Run Docker/PostgreSQL-backed migration apply, rollback, and seed verification on a workstation or CI runner with Docker or PostgreSQL tooling installed. Sprint 2.3 must not begin until explicitly authorised.
 
 ## Release Target
 

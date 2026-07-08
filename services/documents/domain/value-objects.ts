@@ -293,6 +293,10 @@ export class Metadata {
   get(key: string): string | undefined {
     return this.values.get(key);
   }
+
+  entries(): readonly (readonly [string, string])[] {
+    return [...this.values.entries()];
+  }
 }
 
 export class RetentionPeriod {

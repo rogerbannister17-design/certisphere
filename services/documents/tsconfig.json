@@ -6,5 +6,11 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["domain/**/*.ts", "application/**/*.ts", "tests/**/*.ts", "index.ts"]
+  "include": [
+    "domain/**/*.ts",
+    "application/**/*.ts",
+    "infrastructure/**/*.ts",
+    "tests/**/*.ts",
+    "index.ts"
+  ]
 }

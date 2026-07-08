@@ -1,0 +1,22 @@
+DROP TABLE IF EXISTS "document_workflow_references";
+DROP TABLE IF EXISTS "document_process_links";
+DROP TABLE IF EXISTS "document_clause_mappings";
+DROP TABLE IF EXISTS "document_attachments";
+DROP TABLE IF EXISTS "document_reviews";
+DROP TABLE IF EXISTS "document_comments";
+DROP TABLE IF EXISTS "document_evidence_links";
+DROP TABLE IF EXISTS "document_relationships";
+DROP TABLE IF EXISTS "document_approvals";
+DROP TABLE IF EXISTS "document_revisions";
+DROP TABLE IF EXISTS "kcip_documents";
+DROP TABLE IF EXISTS "controlled_information";
+
+DROP TYPE IF EXISTS "WorkflowReferenceStatus";
+DROP TYPE IF EXISTS "ProcessLinkRelationship";
+DROP TYPE IF EXISTS "ClauseCoverageType";
+DROP TYPE IF EXISTS "ApprovalDecision";
+DROP TYPE IF EXISTS "EvidenceRelationshipType";
+DROP TYPE IF EXISTS "RelationshipType";
+DROP TYPE IF EXISTS "ClassificationLevel";
+DROP TYPE IF EXISTS "KcipLifecycleState";
+DROP TYPE IF EXISTS "ControlledInformationType";
