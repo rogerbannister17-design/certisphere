@@ -21,6 +21,7 @@
     "prisma:migrate": "pnpm --filter @certisphere/database prisma:migrate"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^15.5.20",
     "@eslint/js": "^9.30.1",
     "@nestjs/cli": "^11.0.7",
     "@nestjs/schematics": "^11.0.5",

@@ -2,7 +2,7 @@
 
 ## Current Version
 
-0.3.6
+0.3.8
 
 ## Completed Milestones
 
@@ -13,13 +13,15 @@
 - Milestone 1.2F Environment Preparation: Prerequisites documentation and workstation verification scripts added for clean development workstation and GitLab CI runner preparation.
 - Release 0.1.1 Product Governance: Complete. Product vision, roadmap, backlog, architecture decisions, and domain model are established under `/product`.
 - Release 0.1.2 Product Principles: Complete. Permanent product principles are established in `/product/PRODUCT_PRINCIPLES.md`.
-- Release 0.2 Planning: Complete. `SPEC-0001-KCIP.md` defines the Knowledge & Controlled Information Platform engineering specification. Implementation: Not Started.
+- Release 0.1.3 Specification Refinement: Complete. SPEC-0001-KCIP is refined to resolve engineering design review findings, and second review readiness is documented at 96%.
+- Release 0.2 Planning: Complete. `SPEC-0001-KCIP.md` defines the Knowledge & Controlled Information Platform engineering specification. Sprint 2.1 domain implementation is complete.
+- Release 0.2 Sprint 2.1 Domain Model: Complete. KCIP domain aggregates, value objects, lifecycle state machine, domain events, repository interfaces, and domain unit tests are implemented under `services/documents`.
 
 ## Pending Milestones
 
 - Notification delivery for invitation and password reset emails.
 - MFA verification flows beyond persistence and domain boundaries.
-- Release 0.2 Implementation: Not Started. Await explicit authorisation after runtime validation readiness.
+- Release 0.2 Sprint 2.2 Database: Current. Prisma models, migrations, indexes, constraints, seed data, and rollback validation are pending explicit Sprint 2.2 authorisation.
 - Milestone 1.2F Release Verification: Waiting for Runtime Validation. Docker Compose stack startup, PostgreSQL migration apply/rollback, seed verification, end-to-end runtime authentication, frontend runtime workflows, and GitLab runner pipeline confirmation must run on a Docker-enabled workstation or GitLab runner.
 - PostgreSQL-backed migration execution, seed execution, and rollback verification in an environment with Docker or PostgreSQL tooling installed.
 - Docker image build and full-stack runtime verification in an environment with Docker installed.
@@ -44,6 +46,7 @@
 - TypeScript typecheck passes.
 - ESLint passes.
 - Production build passes for every workspace.
+- Release 0.2 Sprint 2.1 KCIP domain tests pass for lifecycle transitions, revision rules, document numbering, approval rules, relationship validation, evidence links, value objects, business invariants, and domain events.
 - High-severity dependency audit passes after pinning patched `multer` via workspace override.
 
 ## Known Issues
@@ -52,7 +55,6 @@
 - PostgreSQL migration apply/rollback and seed verification are blocked because no local PostgreSQL server/client tooling is installed.
 - Milestone 1.2F Release Verification cannot be completed on this machine until Docker and PostgreSQL tooling are available and sufficient disk space is reserved for image builds.
 - Environment preparation scripts are available at `scripts/bootstrap`, `scripts/verify-environment`, `scripts/start-dev`, and `scripts/doctor`.
-- Next.js build reports a non-failing warning that the Next ESLint plugin is not detected in the current flat ESLint configuration.
 - Dependency audit still reports one low and one moderate advisory below the configured high-severity CI threshold.
 - Invitation email delivery, password reset email delivery, and MFA challenge verification require notification-channel integration.
 

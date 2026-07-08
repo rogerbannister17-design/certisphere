@@ -36,7 +36,7 @@ Status: COMPLETE
 
 ## Release 0.2: Knowledge & Controlled Information Platform
 
-Status: PLANNING COMPLETE
+Status: IN PROGRESS - SPRINT 2.1 COMPLETE
 
 Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md)
 
@@ -44,6 +44,7 @@ Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../speci
 
 - Establish the controlled information foundation for policies, procedures, forms, registers, records, checklists, and evidence.
 - Create governance for ownership, approval, publication, revision, retention, and audit trail.
+- Prepare the architecture for ISO 9001, ISO 14001, ISO 45001, and future multi-standard operation.
 
 ### Major Features
 
@@ -53,6 +54,7 @@ Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../speci
 - Revision history and immutable audit events.
 - Searchable knowledge repository.
 - ISO clause mapping.
+- Distribution control, acknowledgement, effective dates, periodic review, generated records, typed relationships, and approval independence.
 
 ### Success Criteria
 
@@ -60,6 +62,8 @@ Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../speci
 - Published information is separated from drafts.
 - Audit events exist for every controlled change.
 - Users can locate controlled information by process, owner, type, and ISO clause.
+- Release 0.1.3 specification refinements resolve high and medium engineering-review risks before Sprint 2.1 begins.
+- Sprint 2.1 domain model implementation is complete with domain aggregates, value objects, domain events, repository interfaces, lifecycle rules, and unit tests.
 
 ### Dependencies
 

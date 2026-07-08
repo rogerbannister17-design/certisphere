@@ -19,6 +19,7 @@
     "paths": {
       "@certisphere/common": ["packages/common/src/index.ts"],
       "@certisphere/database": ["packages/database/src/index.ts"],
+      "@certisphere/documents": ["services/documents/index.ts"],
       "@certisphere/identity": ["services/identity/index.ts"],
       "@certisphere/organisation": ["services/organisation/index.ts"]
     }

@@ -14,14 +14,17 @@ import {
   RefreshSessionService,
   RegisterOrganisationService,
   TOKEN_SERVICE,
+  type CertispherePrismaClient,
 } from '@certisphere/identity';
 
 import { IdentityController } from './identity.controller.js';
 import { BootstrapRegistrationGuard } from './bootstrap-registration.guard.js';
 
+const PrismaClientConstructor = PrismaClient as unknown as new () => CertispherePrismaClient;
+
 const PrismaProvider = {
   provide: PRISMA_CLIENT,
-  useFactory: (): PrismaClient => new PrismaClient(),
+  useFactory: (): CertispherePrismaClient => new PrismaClientConstructor(),
 };
 
 @Module({

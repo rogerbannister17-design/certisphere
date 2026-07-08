@@ -12,32 +12,33 @@ This backlog governs known product work from Release 0.2 onward. It uses MoSCoW 
 
 ## Must Have
 
-Release 0.2 planning is complete in [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md). Implementation remains Not Started.
+Release 0.2 planning is complete in [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md). Release 0.1.3 refined the specification after engineering review. Sprint 2.1 domain implementation is complete. Sprint 2.2 database design and migrations are current.
 
-| Epic                   | Release | Sprint | Priority  | Status   | Work Item                                                                                                          |
-| ---------------------- | ------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| Controlled Information | 0.2     | 2.1    | Must Have | Ready    | Define controlled information types for policies, procedures, forms, registers, checklists, records, and evidence. |
-| Controlled Information | 0.2     | 2.1    | Must Have | Ready    | Implement draft, review, approval, published, superseded, and archived lifecycle.                                  |
-| Controlled Information | 0.2     | 2.1    | Must Have | Ready    | Add ownership, process mapping, ISO clause mapping, and retention metadata.                                        |
-| Controlled Information | 0.2     | 2.2    | Must Have | Ready    | Add immutable audit events for create, update, approve, publish, archive, and restore actions.                     |
-| Search & Knowledge     | 0.2     | 2.3    | Must Have | Ready    | Provide searchable controlled information repository with tenant isolation.                                        |
-| Workflow               | 0.3     | 0.3.1  | Must Have | Proposed | Create reusable workflow definitions and workflow instances.                                                       |
-| Workflow               | 0.3     | 0.3.1  | Must Have | Proposed | Implement review and approval workflow for controlled information.                                                 |
-| Workflow               | 0.3     | 0.3.2  | Must Have | Proposed | Add task assignment, due dates, status tracking, and escalation state.                                             |
-| Audit & Evidence       | 0.4     | 0.4.1  | Must Have | Proposed | Create audit programme, audit plan, audit checklist, and audit execution models.                                   |
-| Audit & Evidence       | 0.4     | 0.4.1  | Must Have | Proposed | Capture evidence against audit questions, ISO clauses, processes, and findings.                                    |
-| CAPA                   | 0.4     | 0.4.2  | Must Have | Proposed | Implement corrective action lifecycle with root cause, action plan, verification, and closure.                     |
-| AI Governance          | 0.5     | 0.5.1  | Must Have | Proposed | Create AI suggestion queue with human review, rejection, revision, and approval.                                   |
-| AI Governance          | 0.5     | 0.5.1  | Must Have | Proposed | Enforce that AI cannot directly modify controlled information.                                                     |
-| Integrated Standards   | 0.6     | 0.6.1  | Must Have | Proposed | Add ISO standard and ISO clause libraries for ISO 9001, ISO 14001, and ISO 27001.                                  |
-| Commercial Launch      | 1.0     | 1.0.1  | Must Have | Proposed | Complete production deployment, monitoring, backup, and recovery readiness.                                        |
+| Epic                   | Release | Sprint | Priority  | Status      | Work Item                                                                                                          |
+| ---------------------- | ------- | ------ | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| Controlled Information | 0.2     | 2.1    | Must Have | Done        | Define controlled information types for policies, procedures, forms, registers, checklists, records, and evidence. |
+| Controlled Information | 0.2     | 2.1    | Must Have | Done        | Implement draft, review, approval, published, superseded, and archived lifecycle.                                  |
+| Controlled Information | 0.2     | 2.1    | Must Have | Done        | Add ownership, process mapping, ISO clause mapping, and retention metadata.                                        |
+| Controlled Information | 0.2     | 2.1    | Must Have | Done        | Define approval independence, distribution control, generated records, ISO 45001 compatibility, and typed links.   |
+| Controlled Information | 0.2     | 2.2    | Must Have | In Progress | Add immutable audit events for create, update, approve, publish, archive, and restore actions.                     |
+| Search & Knowledge     | 0.2     | 2.7    | Must Have | Ready       | Provide searchable controlled information repository with tenant isolation and typed relationship projections.     |
+| Workflow               | 0.3     | 0.3.1  | Must Have | Proposed    | Create reusable workflow definitions and workflow instances.                                                       |
+| Workflow               | 0.3     | 0.3.1  | Must Have | Proposed    | Implement review and approval workflow for controlled information.                                                 |
+| Workflow               | 0.3     | 0.3.2  | Must Have | Proposed    | Add task assignment, due dates, status tracking, and escalation state.                                             |
+| Audit & Evidence       | 0.4     | 0.4.1  | Must Have | Proposed    | Create audit programme, audit plan, audit checklist, and audit execution models.                                   |
+| Audit & Evidence       | 0.4     | 0.4.1  | Must Have | Proposed    | Capture evidence against audit questions, ISO clauses, processes, and findings.                                    |
+| CAPA                   | 0.4     | 0.4.2  | Must Have | Proposed    | Implement corrective action lifecycle with root cause, action plan, verification, and closure.                     |
+| AI Governance          | 0.5     | 0.5.1  | Must Have | Proposed    | Create AI suggestion queue with human review, rejection, revision, and approval.                                   |
+| AI Governance          | 0.5     | 0.5.1  | Must Have | Proposed    | Enforce that AI cannot directly modify controlled information.                                                     |
+| Integrated Standards   | 0.6     | 0.6.1  | Must Have | Proposed    | Add ISO standard and ISO clause libraries for ISO 9001, ISO 14001, and ISO 27001.                                  |
+| Commercial Launch      | 1.0     | 1.0.1  | Must Have | Proposed    | Complete production deployment, monitoring, backup, and recovery readiness.                                        |
 
 ## Should Have
 
 | Epic                   | Release | Sprint | Priority    | Status   | Work Item                                                                 |
 | ---------------------- | ------- | ------ | ----------- | -------- | ------------------------------------------------------------------------- |
 | Controlled Information | 0.2     | 2.4    | Should Have | Ready    | Add document templates for common ISO 9001 management system artefacts.   |
-| Controlled Information | 0.2     | 2.9    | Should Have | Ready    | Add controlled information export for PDF and Word.                       |
+| Controlled Information | 0.2     | 2.9    | Should Have | Ready    | Add governed controlled information export for PDF and Word.              |
 | Workflow               | 0.3     | 0.3.3  | Should Have | Proposed | Add workflow reminders and overdue notifications.                         |
 | Audit & Evidence       | 0.4     | 0.4.2  | Should Have | Proposed | Add audit report generation with findings, evidence, and clause coverage. |
 | Risk                   | 0.4     | 0.4.3  | Should Have | Proposed | Link risks, opportunities, findings, and corrective actions.              |

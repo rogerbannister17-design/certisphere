@@ -18,7 +18,7 @@ import { PRISMA_CLIENT, type CertispherePrismaClient } from './prisma-tokens.js'
 export class PrismaIdentityRepository implements IdentityRepository {
   constructor(@Inject(PRISMA_CLIENT) private readonly prisma: CertispherePrismaClient) {}
 
-  async registerOrganisation(input: RegisterOrganisationInput): Promise<IdentityUser> {
+  registerOrganisation(input: RegisterOrganisationInput): Promise<IdentityUser> {
     return this.prisma.$transaction(async (transaction) => {
       await transaction.organisation.create({
         data: {
@@ -99,7 +99,7 @@ export class PrismaIdentityRepository implements IdentityRepository {
     });
   }
 
-  async findActiveUserForLogin(lookup: LoginLookup): Promise<IdentityUser | null> {
+  findActiveUserForLogin(lookup: LoginLookup): Promise<IdentityUser | null> {
     return this.prisma.user.findFirst({
       where: {
         email: lookup.email,
@@ -167,13 +167,13 @@ export class PrismaIdentityRepository implements IdentityRepository {
     return { sessionId: session.id };
   }
 
-  async findRefreshToken(tokenHash: string): Promise<StoredRefreshToken | null> {
+  findRefreshToken(tokenHash: string): Promise<StoredRefreshToken | null> {
     return this.prisma.refreshToken.findUnique({
       where: { tokenHash },
     });
   }
 
-  async rotateRefreshToken(input: RotateRefreshTokenInput): Promise<StoredRefreshToken> {
+  rotateRefreshToken(input: RotateRefreshTokenInput): Promise<StoredRefreshToken> {
     return this.prisma.$transaction(async (transaction) => {
       const previousToken = await transaction.refreshToken.update({
         where: { tokenHash: input.previousTokenHash },
@@ -194,7 +194,7 @@ export class PrismaIdentityRepository implements IdentityRepository {
     });
   }
 
-  async createInvitation(input: CreateInvitationInput): Promise<InvitationRecord> {
+  createInvitation(input: CreateInvitationInput): Promise<InvitationRecord> {
     return this.prisma.invitation.create({
       data: {
         organisationId: input.organisationId,
