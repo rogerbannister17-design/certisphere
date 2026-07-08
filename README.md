@@ -111,6 +111,7 @@ Release 0.1.1 establishes the permanent product governance source of truth for C
 - [Architecture Decisions](product/ARCHITECTURE_DECISIONS.md)
 - [Domain Model](product/DOMAIN_MODEL.md)
 - [Application Service Catalog](product/APPLICATION_SERVICE_CATALOG.md)
+- [API Design Standards](product/API_DESIGN_STANDARDS.md)
 - [Release Policy](product/RELEASE_POLICY.md)
 
 ## Bounded Contexts
