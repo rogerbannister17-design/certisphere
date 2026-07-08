@@ -70,6 +70,28 @@ pnpm build
 pnpm audit --audit-level high
 ```
 
+## Developer Tooling
+
+Run the official engineering checkpoint before every sprint, release tag, and pull request:
+
+```bash
+scripts/checkpoint-review
+```
+
+The checkpoint reports repository, documentation, architecture, environment, build, test, and persistence readiness. Docker/PostgreSQL runtime checks are reported as pending when local runtime tooling is unavailable.
+
+Additional engineering utilities:
+
+```bash
+scripts/doctor
+scripts/verify-environment
+scripts/release-readiness
+scripts/release-tag v0.2.0-rc1 "Release 0.2.0 RC1"
+scripts/new-sprint 2.3
+```
+
+`release-tag` and `new-sprint` run the checkpoint gate before making Git changes.
+
 ## Governance
 
 All feature work must satisfy the standards in [docs/standards/engineering.md](docs/standards/engineering.md) and the architecture decisions in [docs/adr](docs/adr).

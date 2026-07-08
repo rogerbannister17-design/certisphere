@@ -1,0 +1,319 @@
+#!/usr/bin/env sh
+set -u
+
+cd "$(dirname "$0")/.."
+
+PASS_LABEL="PASS"
+FAIL_LABEL="FAIL"
+PENDING_LABEL="PENDING"
+
+repository_status="$PASS_LABEL"
+documentation_status="$PASS_LABEL"
+architecture_status="$PASS_LABEL"
+environment_status="$PASS_LABEL"
+build_status="$PASS_LABEL"
+tests_status="$PASS_LABEL"
+persistence_status="$PASS_LABEL"
+runtime_validation_status="Complete"
+
+failed_build_steps=""
+
+section() {
+  printf '\n%s\n' "$1"
+}
+
+run_step() {
+  label="$1"
+  shift
+
+  printf '\n[%s]\n' "$label"
+  "$@"
+  status=$?
+
+  if [ "$status" -eq 0 ]; then
+    printf '%s %s\n' "$PASS_LABEL" "$label"
+  else
+    printf '%s %s\n' "$FAIL_LABEL" "$label"
+  fi
+
+  return "$status"
+}
+
+mark_fail() {
+  area="$1"
+  case "$area" in
+    repository) repository_status="$FAIL_LABEL" ;;
+    documentation) documentation_status="$FAIL_LABEL" ;;
+    architecture) architecture_status="$FAIL_LABEL" ;;
+    environment) environment_status="$FAIL_LABEL" ;;
+    build) build_status="$FAIL_LABEL" ;;
+    tests) tests_status="$FAIL_LABEL" ;;
+    persistence) persistence_status="$FAIL_LABEL" ;;
+  esac
+}
+
+record_build_failure() {
+  name="$1"
+  if [ -z "$failed_build_steps" ]; then
+    failed_build_steps="$name"
+  else
+    failed_build_steps="$failed_build_steps, $name"
+  fi
+}
+
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+run_with_database_url() {
+  if [ -n "${DATABASE_URL:-}" ]; then
+    "$@"
+  else
+    DATABASE_URL="postgresql://certisphere:certisphere@localhost:5432/certisphere" "$@"
+  fi
+}
+
+latest_file() {
+  pattern="$1"
+  # shellcheck disable=SC2086
+  set -- $pattern
+  latest=""
+  for file in "$@"; do
+    if [ -f "$file" ]; then
+      latest="$file"
+    fi
+  done
+
+  printf '%s' "$latest"
+}
+
+current_release() {
+  if [ -f PROJECT_STATUS.md ]; then
+    awk '
+      /^## Current Version/ { found = 1; next }
+      found == 1 && NF > 0 { print $0; exit }
+    ' PROJECT_STATUS.md
+  fi
+}
+
+current_sprint() {
+  if [ -f PROJECT_STATUS.md ]; then
+    awk '
+      /Release 0\.2 Sprint 2\.2/ { print "Release 0.2 Sprint 2.2"; exit }
+      /Release 0\.2 Sprint 2\.1/ { print "Release 0.2 Sprint 2.1"; exit }
+    ' PROJECT_STATUS.md
+  fi
+}
+
+next_sprint() {
+  if [ -f PROJECT_STATUS.md ]; then
+    awk '
+      /Release 0\.2 Sprint 2\.3/ { print "Release 0.2 Sprint 2.3"; exit }
+      /Sprint 2\.3/ { print "Release 0.2 Sprint 2.3"; exit }
+    ' PROJECT_STATUS.md
+  fi
+}
+
+section "Repository"
+printf 'Current branch: '
+git branch --show-current || repository_status="$FAIL_LABEL"
+
+printf '\nGit status:\n'
+git status --short --branch || repository_status="$FAIL_LABEL"
+
+printf '\nLast 10 commits:\n'
+git log --oneline -10 || repository_status="$FAIL_LABEL"
+
+printf '\nLatest release tags:\n'
+if git tag --sort=-creatordate | sed -n '1,10p' | grep . >/dev/null 2>&1; then
+  git tag --sort=-creatordate | sed -n '1,10p'
+else
+  printf 'No release tags found.\n'
+fi
+
+section "Documentation"
+for required_document in \
+  PROJECT_STATUS.md \
+  README.md \
+  product/PRODUCT_ROADMAP.md \
+  product/BACKLOG.md \
+  product/RELEASE_POLICY.md
+do
+  if [ -f "$required_document" ]; then
+    printf '%s %s\n' "$PASS_LABEL" "$required_document"
+  else
+    printf '%s %s is missing\n' "$FAIL_LABEL" "$required_document"
+    documentation_status="$FAIL_LABEL"
+  fi
+done
+
+latest_sprint_report="$(latest_file "SPRINT_*_REPORT.md")"
+if [ -n "$latest_sprint_report" ]; then
+  printf '%s Latest sprint report: %s\n' "$PASS_LABEL" "$latest_sprint_report"
+else
+  printf '%s Latest sprint report is missing\n' "$FAIL_LABEL"
+  documentation_status="$FAIL_LABEL"
+fi
+
+latest_adr="$(latest_file "product/ADR-*.md")"
+if [ -n "$latest_adr" ]; then
+  printf '%s Latest ADR: %s\n' "$PASS_LABEL" "$latest_adr"
+else
+  printf '%s Latest ADR is missing\n' "$FAIL_LABEL"
+  architecture_status="$FAIL_LABEL"
+fi
+
+section "Build"
+if ! run_step "pnpm typecheck" pnpm typecheck; then
+  build_status="$FAIL_LABEL"
+  record_build_failure "typecheck"
+fi
+
+if ! run_step "pnpm lint" pnpm lint; then
+  build_status="$FAIL_LABEL"
+  record_build_failure "lint"
+fi
+
+section "Tests"
+if ! run_step "pnpm test" pnpm test; then
+  tests_status="$FAIL_LABEL"
+  record_build_failure "test"
+fi
+
+if ! run_step "pnpm build" pnpm build; then
+  build_status="$FAIL_LABEL"
+  record_build_failure "build"
+fi
+
+section "Database"
+if ! run_step "Prisma validation" run_with_database_url pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma; then
+  persistence_status="$FAIL_LABEL"
+fi
+
+if ! run_step "Prisma generate" run_with_database_url pnpm --filter @certisphere/database prisma:generate; then
+  persistence_status="$FAIL_LABEL"
+fi
+
+if ! run_step "Migration validation" run_with_database_url pnpm --filter @certisphere/database exec prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script; then
+  persistence_status="$FAIL_LABEL"
+fi
+
+if command_exists docker && command_exists psql; then
+  printf '%s Docker and PostgreSQL client are available for runtime validation.\n' "$PASS_LABEL"
+else
+  runtime_validation_status="Runtime validation pending"
+  printf '%s\n' "$runtime_validation_status"
+fi
+
+section "Environment"
+if ! run_step "scripts/doctor" ./scripts/doctor; then
+  environment_status="$FAIL_LABEL"
+fi
+
+if ! run_step "scripts/verify-environment" ./scripts/verify-environment; then
+  environment_status="$FAIL_LABEL"
+fi
+
+section "Repository Health"
+if git diff --check; then
+  printf '%s No whitespace conflict markers from git diff --check\n' "$PASS_LABEL"
+else
+  printf '%s git diff --check reported issues\n' "$FAIL_LABEL"
+  repository_status="$FAIL_LABEL"
+fi
+
+conflict_start="$(printf '%s%s%s%s%s%s%s' '<' '<' '<' '<' '<' '<' '<')"
+conflict_middle="$(printf '%s%s%s%s%s%s%s' '=' '=' '=' '=' '=' '=' '=')"
+conflict_end="$(printf '%s%s%s%s%s%s%s' '>' '>' '>' '>' '>' '>' '>')"
+
+if git grep -n -e "^$conflict_start" -e "^$conflict_middle$" -e "^$conflict_end" -- . ':!pnpm-lock.yaml' >/tmp/certisphere-merge-conflicts.txt 2>/dev/null; then
+  cat /tmp/certisphere-merge-conflicts.txt
+  printf '%s Merge conflict markers detected\n' "$FAIL_LABEL"
+  repository_status="$FAIL_LABEL"
+else
+  printf '%s No merge conflict markers\n' "$PASS_LABEL"
+fi
+
+if [ -z "$(git status --porcelain)" ]; then
+  printf '%s Working tree clean\n' "$PASS_LABEL"
+else
+  printf '%s Working tree has uncommitted changes\n' "$FAIL_LABEL"
+  repository_status="$FAIL_LABEL"
+fi
+
+changed_files="$(git diff --name-only --diff-filter=ACMR; git diff --cached --name-only --diff-filter=ACMR)"
+if [ -n "$changed_files" ]; then
+  todo_found=0
+  for changed_file in $changed_files; do
+    if [ -f "$changed_file" ] && grep -n 'TODO' "$changed_file" >/tmp/certisphere-todo-scan.txt 2>/dev/null; then
+      printf '%s\n' "$changed_file"
+      cat /tmp/certisphere-todo-scan.txt
+      todo_found=1
+    fi
+  done
+
+  if [ "$todo_found" -eq 0 ]; then
+    printf '%s No TODOs within changed files\n' "$PASS_LABEL"
+  else
+    printf '%s TODOs found within changed files\n' "$FAIL_LABEL"
+    repository_status="$FAIL_LABEL"
+  fi
+else
+  printf '%s No changed files to scan for TODOs\n' "$PASS_LABEL"
+fi
+
+if [ -z "$failed_build_steps" ]; then
+  printf '%s No failed build steps\n' "$PASS_LABEL"
+else
+  printf '%s Failed build steps: %s\n' "$FAIL_LABEL" "$failed_build_steps"
+fi
+
+if [ "$runtime_validation_status" = "Runtime validation pending" ] && [ "$persistence_status" = "$PASS_LABEL" ]; then
+  persistence_display="$PENDING_LABEL"
+else
+  persistence_display="$persistence_status"
+fi
+
+ready_for_next_sprint="YES"
+for status in "$repository_status" "$documentation_status" "$architecture_status" "$environment_status" "$build_status" "$tests_status" "$persistence_status"; do
+  if [ "$status" != "$PASS_LABEL" ]; then
+    ready_for_next_sprint="NO"
+  fi
+done
+
+if [ "$runtime_validation_status" = "Runtime validation pending" ]; then
+  ready_for_next_sprint="NO"
+fi
+
+release_value="$(current_release)"
+sprint_value="$(current_sprint)"
+next_sprint_value="$(next_sprint)"
+
+[ -n "$release_value" ] || release_value="Unknown"
+[ -n "$sprint_value" ] || sprint_value="Unknown"
+[ -n "$next_sprint_value" ] || next_sprint_value="Unknown"
+
+printf '\n====================================\n'
+printf 'CERTISPHERE CHECKPOINT REVIEW\n'
+printf 'Repository ........ %s\n' "$repository_status"
+printf 'Documentation ..... %s\n' "$documentation_status"
+printf 'Architecture ...... %s\n' "$architecture_status"
+printf 'Environment ....... %s\n' "$environment_status"
+printf 'Build ............. %s\n' "$build_status"
+printf 'Tests ............. %s\n' "$tests_status"
+printf 'Persistence ....... %s\n' "$persistence_display"
+printf 'Ready for Next Sprint\n'
+printf '%s\n' "$ready_for_next_sprint"
+printf 'Current Release\n'
+printf '%s\n' "$release_value"
+printf 'Current Sprint\n'
+printf '%s\n' "$sprint_value"
+printf 'Next Sprint\n'
+printf '%s\n' "$next_sprint_value"
+printf '====================================\n'
+
+if [ "$ready_for_next_sprint" = "YES" ]; then
+  exit 0
+fi
+
+exit 1

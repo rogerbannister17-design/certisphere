@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -u
+
+cd "$(dirname "$0")/.."
+
+printf 'Certisphere release readiness review\n'
+printf 'Running checkpoint gate before release tagging.\n'
+
+if ./scripts/checkpoint-review; then
+  printf '\nRelease readiness: PASS\n'
+  printf 'The repository is ready for release tagging subject to product-owner approval.\n'
+  exit 0
+fi
+
+printf '\nRelease readiness: FAIL\n' >&2
+printf 'Resolve checkpoint failures before creating a release tag.\n' >&2
+exit 1

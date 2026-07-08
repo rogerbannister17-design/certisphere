@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+set -u
+
+cd "$(dirname "$0")/.."
+
+usage() {
+  printf 'Usage: scripts/new-sprint <sprint-id> [branch-name]\n'
+  printf 'Example: scripts/new-sprint 2.3 feature/release-0.2-sprint-2.3\n'
+}
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  usage
+  exit 0
+fi
+
+sprint_id="${1:-}"
+branch_name="${2:-feature/release-0.2-sprint-$sprint_id}"
+
+if [ -z "$sprint_id" ]; then
+  usage >&2
+  exit 1
+fi
+
+if [ -n "$(git status --porcelain)" ]; then
+  printf 'Working tree is not clean. Commit or stash changes before starting a new sprint.\n' >&2
+  exit 1
+fi
+
+if ! ./scripts/checkpoint-review; then
+  printf 'Checkpoint review failed. Do not start Sprint %s until the gate is resolved.\n' "$sprint_id" >&2
+  exit 1
+fi
+
+if git rev-parse --verify "$branch_name" >/dev/null 2>&1; then
+  printf 'Branch already exists: %s\n' "$branch_name" >&2
+  exit 1
+fi
+
+git switch -c "$branch_name"
+printf 'Started Sprint %s on branch %s\n' "$sprint_id" "$branch_name"
