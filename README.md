@@ -110,6 +110,7 @@ Release 0.1.1 establishes the permanent product governance source of truth for C
 - [Product Backlog](product/BACKLOG.md)
 - [Architecture Decisions](product/ARCHITECTURE_DECISIONS.md)
 - [Domain Model](product/DOMAIN_MODEL.md)
+- [Application Service Catalog](product/APPLICATION_SERVICE_CATALOG.md)
 - [Release Policy](product/RELEASE_POLICY.md)
 
 ## Bounded Contexts
