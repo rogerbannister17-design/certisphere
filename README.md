@@ -78,7 +78,11 @@ Run the official engineering checkpoint before every sprint, release tag, and pu
 scripts/checkpoint-review
 ```
 
-The checkpoint reports repository, documentation, architecture, environment, build, test, and persistence readiness. Docker/PostgreSQL runtime checks are reported as pending when local runtime tooling is unavailable.
+The checkpoint reports repository, documentation, architecture, environment, build, test, and persistence readiness using `PASS`, `WARN`, and `FAIL`.
+
+`WARN` is used when runtime validation is intentionally unavailable, such as missing local Docker, PostgreSQL, or environment variables. Engineering commands such as typecheck, lint, test, build, Prisma validation, and migration validation report `FAIL` only when the command itself fails.
+
+The scripts resolve `pnpm` from `PNPM_HOME`, `PATH`, or Corepack so they work across workstation and CI installation methods. Release tagging reports the latest Git tag before running the release gate.
 
 Additional engineering utilities:
 

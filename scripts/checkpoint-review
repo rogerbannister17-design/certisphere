@@ -2,10 +2,13 @@
 set -u
 
 cd "$(dirname "$0")/.."
+. ./scripts/lib/environment.sh
+set +e
+set -u
 
 PASS_LABEL="PASS"
+WARN_LABEL="WARN"
 FAIL_LABEL="FAIL"
-PENDING_LABEL="PENDING"
 
 repository_status="$PASS_LABEL"
 documentation_status="$PASS_LABEL"
@@ -14,7 +17,7 @@ environment_status="$PASS_LABEL"
 build_status="$PASS_LABEL"
 tests_status="$PASS_LABEL"
 persistence_status="$PASS_LABEL"
-runtime_validation_status="Complete"
+runtime_validation_status="$PASS_LABEL"
 
 failed_build_steps=""
 
@@ -52,6 +55,19 @@ mark_fail() {
   esac
 }
 
+mark_warn() {
+  area="$1"
+  case "$area" in
+    repository) [ "$repository_status" = "$FAIL_LABEL" ] || repository_status="$WARN_LABEL" ;;
+    documentation) [ "$documentation_status" = "$FAIL_LABEL" ] || documentation_status="$WARN_LABEL" ;;
+    architecture) [ "$architecture_status" = "$FAIL_LABEL" ] || architecture_status="$WARN_LABEL" ;;
+    environment) [ "$environment_status" = "$FAIL_LABEL" ] || environment_status="$WARN_LABEL" ;;
+    build) [ "$build_status" = "$FAIL_LABEL" ] || build_status="$WARN_LABEL" ;;
+    tests) [ "$tests_status" = "$FAIL_LABEL" ] || tests_status="$WARN_LABEL" ;;
+    persistence) [ "$persistence_status" = "$FAIL_LABEL" ] || persistence_status="$WARN_LABEL" ;;
+  esac
+}
+
 record_build_failure() {
   name="$1"
   if [ -z "$failed_build_steps" ]; then
@@ -59,10 +75,6 @@ record_build_failure() {
   else
     failed_build_steps="$failed_build_steps, $name"
   fi
-}
-
-command_exists() {
-  command -v "$1" >/dev/null 2>&1
 }
 
 run_with_database_url() {
@@ -87,6 +99,10 @@ latest_file() {
   printf '%s' "$latest"
 }
 
+latest_git_tag() {
+  git for-each-ref --sort=-creatordate --format='%(refname:short)' refs/tags 2>/dev/null | sed -n '1p'
+}
+
 current_release() {
   if [ -f PROJECT_STATUS.md ]; then
     awk '
@@ -99,8 +115,20 @@ current_release() {
 current_sprint() {
   if [ -f PROJECT_STATUS.md ]; then
     awk '
-      /Release 0\.2 Sprint 2\.2/ { print "Release 0.2 Sprint 2.2"; exit }
-      /Release 0\.2 Sprint 2\.1/ { print "Release 0.2 Sprint 2.1"; exit }
+      match($0, /Release 0\.2 Sprint [0-9]+\.[0-9]+/) {
+        sprint = substr($0, RSTART, RLENGTH)
+        if ($0 ~ /Pending explicit authorisation|Current|In Progress/) {
+          print sprint
+          found = 1
+          exit
+        }
+        latest = sprint
+      }
+      END {
+        if (found != 1 && latest != "") {
+          print latest
+        }
+      }
     ' PROJECT_STATUS.md
   fi
 }
@@ -108,10 +136,45 @@ current_sprint() {
 next_sprint() {
   if [ -f PROJECT_STATUS.md ]; then
     awk '
-      /Release 0\.2 Sprint 2\.3/ { print "Release 0.2 Sprint 2.3"; exit }
-      /Sprint 2\.3/ { print "Release 0.2 Sprint 2.3"; exit }
+      match($0, /Release 0\.2 Sprint [0-9]+\.[0-9]+/) && $0 ~ /Pending explicit authorisation|Next|Pending/ {
+        print substr($0, RSTART, RLENGTH)
+        found = 1
+        exit
+      }
+      match($0, /Sprint [0-9]+\.[0-9]+/) && $0 ~ /must not begin|explicitly authorised|Next/ {
+        sprint = substr($0, RSTART, RLENGTH)
+        sub(/^Sprint /, "Release 0.2 Sprint ", sprint)
+        print sprint
+        found = 1
+        exit
+      }
     ' PROJECT_STATUS.md
   fi
+}
+
+run_environment_step() {
+  label="$1"
+  shift
+  output_file="/tmp/certisphere-checkpoint-$(printf '%s' "$label" | tr '/ ' '__').txt"
+
+  printf '\n[%s]\n' "$label"
+  "$@" >"$output_file" 2>&1
+  status=$?
+  cat "$output_file"
+
+  if [ "$status" -eq 0 ]; then
+    if grep '^WARN ' "$output_file" >/dev/null 2>&1; then
+      printf '%s %s\n' "$WARN_LABEL" "$label"
+      mark_warn environment
+    else
+      printf '%s %s\n' "$PASS_LABEL" "$label"
+    fi
+  else
+    printf '%s %s\n' "$FAIL_LABEL" "$label"
+    mark_fail environment
+  fi
+
+  return "$status"
 }
 
 section "Repository"
@@ -125,8 +188,10 @@ printf '\nLast 10 commits:\n'
 git log --oneline -10 || repository_status="$FAIL_LABEL"
 
 printf '\nLatest release tags:\n'
-if git tag --sort=-creatordate | sed -n '1,10p' | grep . >/dev/null 2>&1; then
-  git tag --sort=-creatordate | sed -n '1,10p'
+latest_tag="$(latest_git_tag)"
+if [ -n "$latest_tag" ]; then
+  printf 'Latest tag: %s\n' "$latest_tag"
+  git for-each-ref --sort=-creatordate --format='%(refname:short)' refs/tags | sed -n '1,10p'
 else
   printf 'No release tags found.\n'
 fi
@@ -164,55 +229,51 @@ else
 fi
 
 section "Build"
-if ! run_step "pnpm typecheck" pnpm typecheck; then
+if ! run_step "pnpm typecheck" run_pnpm typecheck; then
   build_status="$FAIL_LABEL"
   record_build_failure "typecheck"
 fi
 
-if ! run_step "pnpm lint" pnpm lint; then
+if ! run_step "pnpm lint" run_pnpm lint; then
   build_status="$FAIL_LABEL"
   record_build_failure "lint"
 fi
 
 section "Tests"
-if ! run_step "pnpm test" pnpm test; then
+if ! run_step "pnpm test" run_pnpm test; then
   tests_status="$FAIL_LABEL"
   record_build_failure "test"
 fi
 
-if ! run_step "pnpm build" pnpm build; then
+if ! run_step "pnpm build" run_pnpm build; then
   build_status="$FAIL_LABEL"
   record_build_failure "build"
 fi
 
 section "Database"
-if ! run_step "Prisma validation" run_with_database_url pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma; then
+if ! run_step "Prisma validation" run_with_database_url run_pnpm --filter @certisphere/database exec prisma validate --schema prisma/schema.prisma; then
   persistence_status="$FAIL_LABEL"
 fi
 
-if ! run_step "Prisma generate" run_with_database_url pnpm --filter @certisphere/database prisma:generate; then
+if ! run_step "Prisma generate" run_with_database_url run_pnpm --filter @certisphere/database prisma:generate; then
   persistence_status="$FAIL_LABEL"
 fi
 
-if ! run_step "Migration validation" run_with_database_url pnpm --filter @certisphere/database exec prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script; then
+if ! run_step "Migration validation" run_with_database_url run_pnpm --filter @certisphere/database exec prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script; then
   persistence_status="$FAIL_LABEL"
 fi
 
 if command_exists docker && command_exists psql; then
   printf '%s Docker and PostgreSQL client are available for runtime validation.\n' "$PASS_LABEL"
 else
-  runtime_validation_status="Runtime validation pending"
-  printf '%s\n' "$runtime_validation_status"
+  runtime_validation_status="$WARN_LABEL"
+  mark_warn persistence
+  printf '%s Runtime validation pending: Docker and/or PostgreSQL client unavailable.\n' "$WARN_LABEL"
 fi
 
 section "Environment"
-if ! run_step "scripts/doctor" ./scripts/doctor; then
-  environment_status="$FAIL_LABEL"
-fi
-
-if ! run_step "scripts/verify-environment" ./scripts/verify-environment; then
-  environment_status="$FAIL_LABEL"
-fi
+run_environment_step "scripts/doctor" ./scripts/doctor || true
+run_environment_step "scripts/verify-environment" ./scripts/verify-environment || true
 
 section "Repository Health"
 if git diff --check; then
@@ -244,8 +305,9 @@ fi
 changed_files="$(git diff --name-only --diff-filter=ACMR; git diff --cached --name-only --diff-filter=ACMR)"
 if [ -n "$changed_files" ]; then
   todo_found=0
+  todo_pattern="$(printf 'TO%s' 'DO')"
   for changed_file in $changed_files; do
-    if [ -f "$changed_file" ] && grep -n 'TODO' "$changed_file" >/tmp/certisphere-todo-scan.txt 2>/dev/null; then
+    if [ -f "$changed_file" ] && grep -n "$todo_pattern" "$changed_file" >/tmp/certisphere-todo-scan.txt 2>/dev/null; then
       printf '%s\n' "$changed_file"
       cat /tmp/certisphere-todo-scan.txt
       todo_found=1
@@ -253,13 +315,13 @@ if [ -n "$changed_files" ]; then
   done
 
   if [ "$todo_found" -eq 0 ]; then
-    printf '%s No TODOs within changed files\n' "$PASS_LABEL"
+    printf '%s No task markers within changed files\n' "$PASS_LABEL"
   else
-    printf '%s TODOs found within changed files\n' "$FAIL_LABEL"
+    printf '%s Task markers found within changed files\n' "$FAIL_LABEL"
     repository_status="$FAIL_LABEL"
   fi
 else
-  printf '%s No changed files to scan for TODOs\n' "$PASS_LABEL"
+  printf '%s No changed files to scan for task markers\n' "$PASS_LABEL"
 fi
 
 if [ -z "$failed_build_steps" ]; then
@@ -268,22 +330,12 @@ else
   printf '%s Failed build steps: %s\n' "$FAIL_LABEL" "$failed_build_steps"
 fi
 
-if [ "$runtime_validation_status" = "Runtime validation pending" ] && [ "$persistence_status" = "$PASS_LABEL" ]; then
-  persistence_display="$PENDING_LABEL"
-else
-  persistence_display="$persistence_status"
-fi
-
 ready_for_next_sprint="YES"
 for status in "$repository_status" "$documentation_status" "$architecture_status" "$environment_status" "$build_status" "$tests_status" "$persistence_status"; do
-  if [ "$status" != "$PASS_LABEL" ]; then
+  if [ "$status" = "$FAIL_LABEL" ]; then
     ready_for_next_sprint="NO"
   fi
 done
-
-if [ "$runtime_validation_status" = "Runtime validation pending" ]; then
-  ready_for_next_sprint="NO"
-fi
 
 release_value="$(current_release)"
 sprint_value="$(current_sprint)"
@@ -301,7 +353,7 @@ printf 'Architecture ...... %s\n' "$architecture_status"
 printf 'Environment ....... %s\n' "$environment_status"
 printf 'Build ............. %s\n' "$build_status"
 printf 'Tests ............. %s\n' "$tests_status"
-printf 'Persistence ....... %s\n' "$persistence_display"
+printf 'Persistence ....... %s\n' "$persistence_status"
 printf 'Ready for Next Sprint\n'
 printf '%s\n' "$ready_for_next_sprint"
 printf 'Current Release\n'

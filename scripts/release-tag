@@ -3,6 +3,10 @@ set -u
 
 cd "$(dirname "$0")/.."
 
+latest_git_tag() {
+  git for-each-ref --sort=-creatordate --format='%(refname:short)' refs/tags 2>/dev/null | sed -n '1p'
+}
+
 usage() {
   printf 'Usage: scripts/release-tag <version> [message]\n'
   printf 'Example: scripts/release-tag v0.2.0-rc1 "Release 0.2.0 RC1"\n'
@@ -32,6 +36,13 @@ esac
 if git rev-parse "$version" >/dev/null 2>&1; then
   printf 'Release tag already exists: %s\n' "$version" >&2
   exit 1
+fi
+
+latest_tag="$(latest_git_tag)"
+if [ -n "$latest_tag" ]; then
+  printf 'Latest release tag: %s\n' "$latest_tag"
+else
+  printf 'Latest release tag: none\n'
 fi
 
 if ! ./scripts/release-readiness; then
