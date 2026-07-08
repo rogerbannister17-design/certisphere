@@ -2,7 +2,7 @@
 
 ## Current Version
 
-0.3.3
+0.3.6
 
 ## Completed Milestones
 
@@ -11,11 +11,15 @@
 - Milestone 1: Identity and Organisation bounded-context source implementation with JWT authentication, refresh tokens, Argon2 password hashing, RBAC, organisation-aware access control, invitation workflow, audit-event persistence, Docker integration, and CI validation definitions.
 - Milestone 1.2E: Engineering Complete. Production-readiness validation executed for dependency installation, Prisma generation/schema validation, TypeScript, ESLint, production builds, unit tests, API integration tests, and high-severity dependency audit.
 - Milestone 1.2F Environment Preparation: Prerequisites documentation and workstation verification scripts added for clean development workstation and GitLab CI runner preparation.
+- Release 0.1.1 Product Governance: Complete. Product vision, roadmap, backlog, architecture decisions, and domain model are established under `/product`.
+- Release 0.1.2 Product Principles: Complete. Permanent product principles are established in `/product/PRODUCT_PRINCIPLES.md`.
+- Release 0.2 Planning: Complete. `SPEC-0001-KCIP.md` defines the Knowledge & Controlled Information Platform engineering specification. Implementation: Not Started.
 
 ## Pending Milestones
 
 - Notification delivery for invitation and password reset emails.
 - MFA verification flows beyond persistence and domain boundaries.
+- Release 0.2 Implementation: Not Started. Await explicit authorisation after runtime validation readiness.
 - Milestone 1.2F Release Verification: Waiting for Runtime Validation. Docker Compose stack startup, PostgreSQL migration apply/rollback, seed verification, end-to-end runtime authentication, frontend runtime workflows, and GitLab runner pipeline confirmation must run on a Docker-enabled workstation or GitLab runner.
 - PostgreSQL-backed migration execution, seed execution, and rollback verification in an environment with Docker or PostgreSQL tooling installed.
 - Docker image build and full-stack runtime verification in an environment with Docker installed.

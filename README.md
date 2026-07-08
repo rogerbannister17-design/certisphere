@@ -74,6 +74,17 @@ pnpm audit --audit-level high
 
 All feature work must satisfy the standards in [docs/standards/engineering.md](docs/standards/engineering.md) and the architecture decisions in [docs/adr](docs/adr).
 
+## Product Governance
+
+Release 0.1.1 establishes the permanent product governance source of truth for Certisphere.
+
+- [Product Vision](product/PRODUCT_VISION.md)
+- [Product Principles](product/PRODUCT_PRINCIPLES.md)
+- [Product Roadmap](product/PRODUCT_ROADMAP.md)
+- [Product Backlog](product/BACKLOG.md)
+- [Architecture Decisions](product/ARCHITECTURE_DECISIONS.md)
+- [Domain Model](product/DOMAIN_MODEL.md)
+
 ## Bounded Contexts
 
 Each domain under `services` owns its own `application`, `domain`, `infrastructure`, `api`, and `tests` layers.
