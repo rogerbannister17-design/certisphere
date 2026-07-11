@@ -17,12 +17,14 @@
 - Release 0.2 Planning: Complete. `SPEC-0001-KCIP.md` defines the Knowledge & Controlled Information Platform engineering specification. Sprint 2.1 domain implementation is complete.
 - Release 0.2 Sprint 2.1 Domain Model: Complete. KCIP domain aggregates, value objects, lifecycle state machine, domain events, repository interfaces, and domain unit tests are implemented under `services/documents`.
 - Release 0.2 Sprint 2.2 Persistence Foundation: Complete. Release Policy, KCIP Prisma schema, migration SQL, rollback SQL, seed SQL, repository adapters, entity mappers, and persistence tests are implemented.
+- Release 0.2 Sprint 2.3 Application Services and Use Cases: Complete. KCIP application services, transaction abstraction, domain-event publication ports, service wiring, and application unit tests are implemented under `services/documents/application`.
+- Engineering Asset: Brand Design System. Status: Version Controlled. The Certisphere Brand Design System is governed under `docs/brand` with preserved source assets and structured brand documentation.
 
 ## Pending Milestones
 
 - Notification delivery for invitation and password reset emails.
 - MFA verification flows beyond persistence and domain boundaries.
-- Release 0.2 Sprint 2.3: Pending explicit authorisation. No Sprint 2.3 implementation has started.
+- Release 0.2 Sprint 2.4: Pending explicit authorisation. No Sprint 2.4 implementation has started.
 - Milestone 1.2F Release Verification: Waiting for Runtime Validation. Docker Compose stack startup, PostgreSQL migration apply/rollback, seed verification, end-to-end runtime authentication, frontend runtime workflows, and GitLab runner pipeline confirmation must run on a Docker-enabled workstation or GitLab runner.
 - PostgreSQL-backed migration execution, seed execution, and rollback verification in an environment with Docker or PostgreSQL tooling installed.
 - Docker image build and full-stack runtime verification in an environment with Docker installed.
@@ -52,6 +54,7 @@
 - Production build passes for every workspace.
 - Release 0.2 Sprint 2.1 KCIP domain tests pass for lifecycle transitions, revision rules, document numbering, approval rules, relationship validation, evidence links, value objects, business invariants, and domain events.
 - Release 0.2 Sprint 2.2 KCIP persistence tests pass for migration structure, rollback structure, seed validation, repository transactions, tenant metadata, entity mapping, and adapter persistence behaviour.
+- Release 0.2 Sprint 2.3 KCIP application-service tests pass for controlled information registration, metadata update, archive, restore, tenant isolation, revision creation, revision restoration, approval independence, approval decisions, publication, withdrawal, distribution orchestration, relationship creation, evidence linking, evidence removal orchestration, search orchestration, transaction rollback, and service wiring.
 - High-severity dependency audit passes after pinning patched `multer` via workspace override.
 
 ## Known Issues
@@ -65,7 +68,7 @@
 
 ## Next Milestone
 
-Run Docker/PostgreSQL-backed migration apply, rollback, and seed verification on a workstation or CI runner with Docker or PostgreSQL tooling installed. Sprint 2.3 must not begin until explicitly authorised.
+Run Docker/PostgreSQL-backed migration apply, rollback, and seed verification on a workstation or CI runner with Docker or PostgreSQL tooling installed. Sprint 2.4 must not begin until explicitly authorised.
 
 ## Release Target
 

@@ -12,7 +12,7 @@ This backlog governs known product work from Release 0.2 onward. It uses MoSCoW 
 
 ## Must Have
 
-Release 0.2 planning is complete in [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md). Release 0.1.3 refined the specification after engineering review. Sprint 2.1 domain implementation is complete. Sprint 2.2 persistence foundation is complete. Sprint 2.3 remains pending explicit authorisation.
+Release 0.2 planning is complete in [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md). Release 0.1.3 refined the specification after engineering review. Sprint 2.1 domain implementation is complete. Sprint 2.2 persistence foundation is complete. Sprint 2.3 application services are complete. Sprint 2.4 remains pending explicit authorisation.
 
 | Epic                   | Release | Sprint | Priority  | Status   | Work Item                                                                                                          |
 | ---------------------- | ------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -21,7 +21,8 @@ Release 0.2 planning is complete in [SPEC-0001: Knowledge & Controlled Informati
 | Controlled Information | 0.2     | 2.1    | Must Have | Done     | Add ownership, process mapping, ISO clause mapping, and retention metadata.                                        |
 | Controlled Information | 0.2     | 2.1    | Must Have | Done     | Define approval independence, distribution control, generated records, ISO 45001 compatibility, and typed links.   |
 | Controlled Information | 0.2     | 2.2    | Must Have | Done     | Implement KCIP Prisma persistence models, migrations, repository adapters, seed data, and rollback scripts.        |
-| Controlled Information | 0.2     | 2.3    | Must Have | Ready    | Add immutable audit events for create, update, approve, publish, archive, and restore actions.                     |
+| Controlled Information | 0.2     | 2.3    | Must Have | Done     | Implement KCIP application services, transaction coordination, domain-event publication ports, and use-case tests. |
+| Controlled Information | 0.2     | 2.4    | Must Have | Ready    | Add immutable audit-event persistence integration for create, update, approve, publish, archive, and restore actions. |
 | Search & Knowledge     | 0.2     | 2.7    | Must Have | Ready    | Provide searchable controlled information repository with tenant isolation and typed relationship projections.     |
 | Workflow               | 0.3     | 0.3.1  | Must Have | Proposed | Create reusable workflow definitions and workflow instances.                                                       |
 | Workflow               | 0.3     | 0.3.1  | Must Have | Proposed | Implement review and approval workflow for controlled information.                                                 |

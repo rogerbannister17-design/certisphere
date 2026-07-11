@@ -16,6 +16,13 @@ import type {
   RevisionId,
 } from '../domain/value-objects.js';
 
+export const CONTROLLED_INFORMATION_REPOSITORY = Symbol('CONTROLLED_INFORMATION_REPOSITORY');
+export const DOCUMENT_REPOSITORY = Symbol('DOCUMENT_REPOSITORY');
+export const APPROVAL_REPOSITORY = Symbol('APPROVAL_REPOSITORY');
+export const RELATIONSHIP_REPOSITORY = Symbol('RELATIONSHIP_REPOSITORY');
+export const EVIDENCE_REPOSITORY = Symbol('EVIDENCE_REPOSITORY');
+export const REVISION_REPOSITORY = Symbol('REVISION_REPOSITORY');
+
 export interface ControlledInformationRepository {
   findById(id: ControlledInformationId): Promise<ControlledInformation | null>;
   existsByDocumentNumber(documentNumber: DocumentNumber): Promise<boolean>;

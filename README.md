@@ -104,15 +104,45 @@ All feature work must satisfy the standards in [docs/standards/engineering.md](d
 
 Release 0.1.1 establishes the permanent product governance source of truth for Certisphere.
 
+- [Governance Index](governance/README.md)
 - [Product Vision](product/PRODUCT_VISION.md)
 - [Product Principles](product/PRODUCT_PRINCIPLES.md)
+- [Product Decision Records](product/pdr/README.md)
 - [Product Roadmap](product/PRODUCT_ROADMAP.md)
 - [Product Backlog](product/BACKLOG.md)
 - [Architecture Decisions](product/ARCHITECTURE_DECISIONS.md)
 - [Domain Model](product/DOMAIN_MODEL.md)
 - [Application Service Catalog](product/APPLICATION_SERVICE_CATALOG.md)
 - [API Design Standards](product/API_DESIGN_STANDARDS.md)
+- [API Security Standard](product/API_SECURITY_STANDARD.md)
 - [Release Policy](product/RELEASE_POLICY.md)
+
+## Design System
+
+The Certisphere Brand Design System is governed under [docs/brand](docs/brand/README.md).
+
+- [Brand Guidelines](docs/brand/BRAND_GUIDELINES.md)
+- [Brand Governance](docs/brand/BRAND_GOVERNANCE.md)
+- [Brand Portal](docs/brand/BRAND_PORTAL.md)
+- [Brand Review Checklist](docs/brand/BRAND_REVIEW_CHECKLIST.md)
+- [Brand Strategy](docs/brand/BRAND_STRATEGY.md)
+- [Brand Voice](docs/brand/BRAND_VOICE.md)
+- [Visual Identity](docs/brand/VISUAL_IDENTITY.md)
+- [Colour System](docs/brand/COLOUR_SYSTEM.md)
+- [Design Tokens](docs/brand/DESIGN_TOKENS.md)
+- [AI Prompt Library](docs/brand/AI_PROMPT_LIBRARY.md)
+- [Typography](docs/brand/TYPOGRAPHY.md)
+- [Logo Usage](docs/brand/LOGO_USAGE.md)
+- [Iconography](docs/brand/ICONOGRAPHY.md)
+- [Illustration Style](docs/brand/ILLUSTRATION_STYLE.md)
+- [Photography Style](docs/brand/PHOTOGRAPHY_STYLE.md)
+- [UI Branding](docs/brand/UI_BRANDING.md)
+- [UI Design System](docs/brand/UI_DESIGN_SYSTEM.md)
+- [Presentation Guidelines](docs/brand/PRESENTATION_GUIDELINES.md)
+- [Video Style Guide](docs/brand/VIDEO_STYLE_GUIDE.md)
+- [Document Templates](docs/brand/DOCUMENT_TEMPLATES.md)
+- [Website Guidelines](docs/brand/WEBSITE_GUIDELINES.md)
+- [Brand Assets](docs/brand/BRAND_ASSETS.md)
 
 ## Bounded Contexts
 

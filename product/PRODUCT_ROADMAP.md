@@ -36,7 +36,7 @@ Status: COMPLETE
 
 ## Release 0.2: Knowledge & Controlled Information Platform
 
-Status: IN PROGRESS - SPRINT 2.2 COMPLETE
+Status: IN PROGRESS - SPRINT 2.3 COMPLETE
 
 Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../specifications/SPEC-0001-KCIP.md)
 
@@ -65,6 +65,7 @@ Specification: [SPEC-0001: Knowledge & Controlled Information Platform](../speci
 - Release 0.1.3 specification refinements resolve high and medium engineering-review risks before Sprint 2.1 begins.
 - Sprint 2.1 domain model implementation is complete with domain aggregates, value objects, domain events, repository interfaces, lifecycle rules, and unit tests.
 - Sprint 2.2 persistence foundation is complete with Prisma models, repository adapters, migration scripts, rollback scripts, seed data, and persistence tests.
+- Sprint 2.3 application service implementation is complete with controlled information, revision, approval, publication, relationship, evidence, lifecycle, search orchestration, transaction abstraction, domain-event publication ports, and unit tests.
 
 ### Dependencies
 
